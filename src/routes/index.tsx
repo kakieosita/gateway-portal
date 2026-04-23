@@ -66,11 +66,13 @@ function Index() {
   return (
     <div className="min-h-screen bg-gradient-soft">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground shadow-soft">
-            <GraduationCap className="h-5 w-5" />
+        <Link to="/" className="flex items-center gap-3 font-display text-lg font-bold">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-card p-1 shadow-soft ring-1 ring-border">
+            <img src={upskillLogo} alt="Upskill School of Technology" className="h-full w-full object-contain" />
           </div>
-          Lumen<span className="font-light text-muted-foreground">Ed</span>
+          <span className="leading-tight">
+            Upskill <span className="block text-[10px] font-medium uppercase tracking-wider text-muted-foreground">School of Technology</span>
+          </span>
         </Link>
         <div className="flex items-center gap-3">
           <Link to="/login" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
