@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { GraduationCap, Sparkles, BookOpen, Users } from "lucide-react";
+import { Sparkles, BookOpen, Users } from "lucide-react";
+import upskillLogo from "@/assets/upskill-logo.png";
 
 interface AuthLayoutProps {
   title: string;
@@ -17,11 +18,11 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
         <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary-glow/40 blur-3xl" />
         <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-mint/30 blur-3xl" />
 
-        <Link to="/" className="relative flex items-center gap-2 font-display text-xl font-bold">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
-            <GraduationCap className="h-6 w-6" />
+        <Link to="/" className="relative flex items-center gap-3 font-display text-xl font-bold">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white p-1.5 shadow-soft">
+            <img src={upskillLogo} alt="Upskill School of Technology" className="h-full w-full object-contain" />
           </div>
-          Lumen<span className="font-light opacity-80">Ed</span>
+          <span>Upskill<span className="ml-1 font-light opacity-80">SoT</span></span>
         </Link>
 
         <motion.div
@@ -38,18 +39,18 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
               Where curious minds<br />become brilliant ones.
             </h2>
             <p className="mt-4 max-w-md text-base text-primary-foreground/80">
-              Join 200,000+ students and instructors building skills that matter on LumenEd.
+              Join thousands of students and instructors building tech skills that matter at Upskill School of Technology, Owerri.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 max-w-md">
-            <Feature icon={<BookOpen className="h-4 w-4" />} label="1,200+ courses" />
+            <Feature icon={<BookOpen className="h-4 w-4" />} label="Industry curriculum" />
             <Feature icon={<Users className="h-4 w-4" />} label="Live cohorts" />
           </div>
         </motion.div>
 
         <p className="relative text-sm text-primary-foreground/70">
-          © {new Date().getFullYear()} LumenEd Learning Inc.
+          © {new Date().getFullYear()} Upskill School of Technology, Owerri.
         </p>
       </div>
 
@@ -57,10 +58,10 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
       <div className="flex flex-col bg-gradient-soft">
         <div className="flex items-center justify-between p-6 lg:hidden">
           <Link to="/" className="flex items-center gap-2 font-display font-bold">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground">
-              <GraduationCap className="h-5 w-5" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-soft">
+              <img src={upskillLogo} alt="Upskill" className="h-full w-full object-contain" />
             </div>
-            LumenEd
+            Upskill
           </Link>
         </div>
 
