@@ -18,11 +18,11 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
         <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary-glow/40 blur-3xl" />
         <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-mint/30 blur-3xl" />
 
-        <Link to="/" className="relative flex items-center gap-2 font-display text-xl font-bold">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
-            <GraduationCap className="h-6 w-6" />
+        <Link to="/" className="relative flex items-center gap-3 font-display text-xl font-bold">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white p-1.5 shadow-soft">
+            <img src={upskillLogo} alt="Upskill School of Technology" className="h-full w-full object-contain" />
           </div>
-          Lumen<span className="font-light opacity-80">Ed</span>
+          <span>Upskill<span className="ml-1 font-light opacity-80">SoT</span></span>
         </Link>
 
         <motion.div
