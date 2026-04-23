@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { GraduationCap, Sparkles, BookOpen, Users } from "lucide-react";
+import { Sparkles, BookOpen, Users } from "lucide-react";
+import upskillLogo from "@/assets/upskill-logo.png";
 
 interface AuthLayoutProps {
   title: string;
