@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import upskillLogo from "@/assets/upskill-logo.png";
 
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
