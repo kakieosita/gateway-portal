@@ -14,12 +14,12 @@ import upskillLogo from "@/assets/upskill-logo.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LumenEd — Modern learning platform" },
+      { title: "Upskill School of Technology — Owerri" },
       {
         name: "description",
-        content: "LumenEd is a modern edtech platform for students and instructors.",
+        content: "Upskill School of Technology, Owerri — modern tech education for students and instructors.",
       },
-      { property: "og:title", content: "LumenEd — Modern learning platform" },
+      { property: "og:title", content: "Upskill School of Technology — Owerri" },
       {
         property: "og:description",
         content: "Sign up as a student or instructor and start learning today.",
