@@ -33,7 +33,7 @@ const schema = z.object({
     .regex(/[A-Z]/, "Add an uppercase letter")
     .regex(/[0-9]/, "Add a number"),
   role: z.enum(["student", "instructor"]),
-  terms: z.literal(true, { errorMap: () => ({ message: "You must accept the terms" }) }),
+  terms: z.boolean().refine((v) => v === true, { message: "You must accept the terms" }),
 });
 type FormData = z.infer<typeof schema>;
 
