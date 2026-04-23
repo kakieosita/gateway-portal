@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
-  GraduationCap,
   ArrowRight,
   LogIn,
   UserPlus,
@@ -10,6 +9,7 @@ import {
   MailCheck,
   Sparkles,
 } from "lucide-react";
+import upskillLogo from "@/assets/upskill-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
