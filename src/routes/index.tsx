@@ -76,6 +76,9 @@ function Index() {
           </span>
         </Link>
         <div className="flex items-center gap-3">
+          <Link to="/dashboard" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
+            Dashboard
+          </Link>
           <Link to="/login" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
             Sign in
           </Link>
