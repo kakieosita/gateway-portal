@@ -3,13 +3,20 @@ import { LayoutDashboard, BookOpen, FileText, Award, User, LogOut, X } from "luc
 import upskillLogo from "@/assets/upskill-logo.png";
 import { cn } from "@/lib/utils";
 
-const items = [
+type NavItem = {
+  to: "/dashboard" | "/dashboard/courses" | "/dashboard/assignments" | "/dashboard/certificates" | "/dashboard/profile";
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+};
+
+const items: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/courses", label: "My Courses", icon: BookOpen },
   { to: "/dashboard/assignments", label: "Assignments", icon: FileText },
   { to: "/dashboard/certificates", label: "Certificates", icon: Award },
   { to: "/dashboard/profile", label: "Profile", icon: User },
-] as const;
+];
 
 export function DashboardSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { location } = useRouterState();

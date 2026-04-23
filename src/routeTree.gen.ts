@@ -14,7 +14,14 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardCoursesRouteImport } from './routes/dashboard.courses'
+import { Route as DashboardCertificatesRouteImport } from './routes/dashboard.certificates'
+import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.assignments'
+import { Route as DashboardCoursesCourseIdRouteImport } from './routes/dashboard.courses.$courseId'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -41,19 +48,62 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCoursesRoute = DashboardCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCertificatesRoute = DashboardCertificatesRouteImport.update({
+  id: '/certificates',
+  path: '/certificates',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAssignmentsRoute = DashboardAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCoursesCourseIdRoute =
+  DashboardCoursesCourseIdRouteImport.update({
+    id: '/$courseId',
+    path: '/$courseId',
+    getParentRoute: () => DashboardCoursesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/dashboard/assignments': typeof DashboardAssignmentsRoute
+  '/dashboard/certificates': typeof DashboardCertificatesRoute
+  '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,25 +112,45 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/dashboard/assignments': typeof DashboardAssignmentsRoute
+  '/dashboard/certificates': typeof DashboardCertificatesRoute
+  '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/dashboard/assignments': typeof DashboardAssignmentsRoute
+  '/dashboard/certificates': typeof DashboardCertificatesRoute
+  '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/dashboard/assignments'
+    | '/dashboard/certificates'
+    | '/dashboard/courses'
+    | '/dashboard/profile'
+    | '/dashboard/'
+    | '/dashboard/courses/$courseId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,18 +159,32 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/dashboard/assignments'
+    | '/dashboard/certificates'
+    | '/dashboard/courses'
+    | '/dashboard/profile'
+    | '/dashboard'
+    | '/dashboard/courses/$courseId'
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/dashboard/assignments'
+    | '/dashboard/certificates'
+    | '/dashboard/courses'
+    | '/dashboard/profile'
+    | '/dashboard/'
+    | '/dashboard/courses/$courseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -145,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -152,11 +243,85 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/courses': {
+      id: '/dashboard/courses'
+      path: '/courses'
+      fullPath: '/dashboard/courses'
+      preLoaderRoute: typeof DashboardCoursesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/certificates': {
+      id: '/dashboard/certificates'
+      path: '/certificates'
+      fullPath: '/dashboard/certificates'
+      preLoaderRoute: typeof DashboardCertificatesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/assignments': {
+      id: '/dashboard/assignments'
+      path: '/assignments'
+      fullPath: '/dashboard/assignments'
+      preLoaderRoute: typeof DashboardAssignmentsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/courses/$courseId': {
+      id: '/dashboard/courses/$courseId'
+      path: '/$courseId'
+      fullPath: '/dashboard/courses/$courseId'
+      preLoaderRoute: typeof DashboardCoursesCourseIdRouteImport
+      parentRoute: typeof DashboardCoursesRoute
+    }
   }
 }
 
+interface DashboardCoursesRouteChildren {
+  DashboardCoursesCourseIdRoute: typeof DashboardCoursesCourseIdRoute
+}
+
+const DashboardCoursesRouteChildren: DashboardCoursesRouteChildren = {
+  DashboardCoursesCourseIdRoute: DashboardCoursesCourseIdRoute,
+}
+
+const DashboardCoursesRouteWithChildren =
+  DashboardCoursesRoute._addFileChildren(DashboardCoursesRouteChildren)
+
+interface DashboardRouteChildren {
+  DashboardAssignmentsRoute: typeof DashboardAssignmentsRoute
+  DashboardCertificatesRoute: typeof DashboardCertificatesRoute
+  DashboardCoursesRoute: typeof DashboardCoursesRouteWithChildren
+  DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAssignmentsRoute: DashboardAssignmentsRoute,
+  DashboardCertificatesRoute: DashboardCertificatesRoute,
+  DashboardCoursesRoute: DashboardCoursesRouteWithChildren,
+  DashboardProfileRoute: DashboardProfileRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
