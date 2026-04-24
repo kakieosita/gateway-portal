@@ -103,7 +103,7 @@ function AnalyticsPage() {
                 <YAxis tick={{ fontSize: 11 }} stroke="oklch(0.5 0.03 255)" tickFormatter={(v) => `${v / 1000}k`} />
                 <Tooltip
                   contentStyle={{ borderRadius: 12, border: "1px solid oklch(0.92 0.015 250)" }}
-                  formatter={(v: number) => `₦${v.toLocaleString()}`}
+                  formatter={(v: any) => `₦${Number(v).toLocaleString()}`}
                 />
                 <Bar dataKey="revenue" fill="oklch(0.5 0.16 255)" radius={[8, 8, 0, 0]} />
               </BarChart>

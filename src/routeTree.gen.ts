@@ -17,11 +17,18 @@ import { Route as InstructorRouteImport } from './routes/instructor'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InstructorIndexRouteImport } from './routes/instructor.index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as InstructorStudentsRouteImport } from './routes/instructor.students'
+import { Route as InstructorProfileRouteImport } from './routes/instructor.profile'
+import { Route as InstructorAssignmentsRouteImport } from './routes/instructor.assignments'
+import { Route as InstructorAnalyticsRouteImport } from './routes/instructor.analytics'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
 import { Route as DashboardCoursesRouteImport } from './routes/dashboard.courses'
 import { Route as DashboardCertificatesRouteImport } from './routes/dashboard.certificates'
 import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.assignments'
+import { Route as InstructorCoursesIndexRouteImport } from './routes/instructor.courses.index'
+import { Route as InstructorCoursesNewRouteImport } from './routes/instructor.courses.new'
 import { Route as DashboardCoursesCourseIdRouteImport } from './routes/dashboard.courses.$courseId'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
@@ -64,10 +71,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InstructorIndexRoute = InstructorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InstructorRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const InstructorStudentsRoute = InstructorStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorProfileRoute = InstructorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorAssignmentsRoute = InstructorAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorAnalyticsRoute = InstructorAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => InstructorRoute,
 } as any)
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/profile',
@@ -89,6 +121,16 @@ const DashboardAssignmentsRoute = DashboardAssignmentsRouteImport.update({
   path: '/assignments',
   getParentRoute: () => DashboardRoute,
 } as any)
+const InstructorCoursesIndexRoute = InstructorCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorCoursesNewRoute = InstructorCoursesNewRouteImport.update({
+  id: '/courses/new',
+  path: '/courses/new',
+  getParentRoute: () => InstructorRoute,
+} as any)
 const DashboardCoursesCourseIdRoute =
   DashboardCoursesCourseIdRouteImport.update({
     id: '/$courseId',
@@ -100,7 +142,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
-  '/instructor': typeof InstructorRoute
+  '/instructor': typeof InstructorRouteWithChildren
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -109,13 +151,19 @@ export interface FileRoutesByFullPath {
   '/dashboard/certificates': typeof DashboardCertificatesRoute
   '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/assignments': typeof InstructorAssignmentsRoute
+  '/instructor/profile': typeof InstructorProfileRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/instructor/': typeof InstructorIndexRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
+  '/instructor/courses/new': typeof InstructorCoursesNewRoute
+  '/instructor/courses/': typeof InstructorCoursesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/instructor': typeof InstructorRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -124,15 +172,22 @@ export interface FileRoutesByTo {
   '/dashboard/certificates': typeof DashboardCertificatesRoute
   '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/assignments': typeof InstructorAssignmentsRoute
+  '/instructor/profile': typeof InstructorProfileRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/instructor': typeof InstructorIndexRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
+  '/instructor/courses/new': typeof InstructorCoursesNewRoute
+  '/instructor/courses': typeof InstructorCoursesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
-  '/instructor': typeof InstructorRoute
+  '/instructor': typeof InstructorRouteWithChildren
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -141,8 +196,15 @@ export interface FileRoutesById {
   '/dashboard/certificates': typeof DashboardCertificatesRoute
   '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/assignments': typeof InstructorAssignmentsRoute
+  '/instructor/profile': typeof InstructorProfileRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/instructor/': typeof InstructorIndexRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
+  '/instructor/courses/new': typeof InstructorCoursesNewRoute
+  '/instructor/courses/': typeof InstructorCoursesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,13 +221,19 @@ export interface FileRouteTypes {
     | '/dashboard/certificates'
     | '/dashboard/courses'
     | '/dashboard/profile'
+    | '/instructor/analytics'
+    | '/instructor/assignments'
+    | '/instructor/profile'
+    | '/instructor/students'
     | '/dashboard/'
+    | '/instructor/'
     | '/dashboard/courses/$courseId'
+    | '/instructor/courses/new'
+    | '/instructor/courses/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/forgot-password'
-    | '/instructor'
     | '/login'
     | '/reset-password'
     | '/signup'
@@ -174,8 +242,15 @@ export interface FileRouteTypes {
     | '/dashboard/certificates'
     | '/dashboard/courses'
     | '/dashboard/profile'
+    | '/instructor/analytics'
+    | '/instructor/assignments'
+    | '/instructor/profile'
+    | '/instructor/students'
     | '/dashboard'
+    | '/instructor'
     | '/dashboard/courses/$courseId'
+    | '/instructor/courses/new'
+    | '/instructor/courses'
   id:
     | '__root__'
     | '/'
@@ -190,15 +265,22 @@ export interface FileRouteTypes {
     | '/dashboard/certificates'
     | '/dashboard/courses'
     | '/dashboard/profile'
+    | '/instructor/analytics'
+    | '/instructor/assignments'
+    | '/instructor/profile'
+    | '/instructor/students'
     | '/dashboard/'
+    | '/instructor/'
     | '/dashboard/courses/$courseId'
+    | '/instructor/courses/new'
+    | '/instructor/courses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  InstructorRoute: typeof InstructorRoute
+  InstructorRoute: typeof InstructorRouteWithChildren
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
@@ -263,12 +345,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/instructor/': {
+      id: '/instructor/'
+      path: '/'
+      fullPath: '/instructor/'
+      preLoaderRoute: typeof InstructorIndexRouteImport
+      parentRoute: typeof InstructorRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/instructor/students': {
+      id: '/instructor/students'
+      path: '/students'
+      fullPath: '/instructor/students'
+      preLoaderRoute: typeof InstructorStudentsRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/profile': {
+      id: '/instructor/profile'
+      path: '/profile'
+      fullPath: '/instructor/profile'
+      preLoaderRoute: typeof InstructorProfileRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/assignments': {
+      id: '/instructor/assignments'
+      path: '/assignments'
+      fullPath: '/instructor/assignments'
+      preLoaderRoute: typeof InstructorAssignmentsRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/analytics': {
+      id: '/instructor/analytics'
+      path: '/analytics'
+      fullPath: '/instructor/analytics'
+      preLoaderRoute: typeof InstructorAnalyticsRouteImport
+      parentRoute: typeof InstructorRoute
     }
     '/dashboard/profile': {
       id: '/dashboard/profile'
@@ -297,6 +414,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/assignments'
       preLoaderRoute: typeof DashboardAssignmentsRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/instructor/courses/': {
+      id: '/instructor/courses/'
+      path: '/courses'
+      fullPath: '/instructor/courses/'
+      preLoaderRoute: typeof InstructorCoursesIndexRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/courses/new': {
+      id: '/instructor/courses/new'
+      path: '/courses/new'
+      fullPath: '/instructor/courses/new'
+      preLoaderRoute: typeof InstructorCoursesNewRouteImport
+      parentRoute: typeof InstructorRoute
     }
     '/dashboard/courses/$courseId': {
       id: '/dashboard/courses/$courseId'
@@ -339,11 +470,35 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface InstructorRouteChildren {
+  InstructorAnalyticsRoute: typeof InstructorAnalyticsRoute
+  InstructorAssignmentsRoute: typeof InstructorAssignmentsRoute
+  InstructorProfileRoute: typeof InstructorProfileRoute
+  InstructorStudentsRoute: typeof InstructorStudentsRoute
+  InstructorIndexRoute: typeof InstructorIndexRoute
+  InstructorCoursesNewRoute: typeof InstructorCoursesNewRoute
+  InstructorCoursesIndexRoute: typeof InstructorCoursesIndexRoute
+}
+
+const InstructorRouteChildren: InstructorRouteChildren = {
+  InstructorAnalyticsRoute: InstructorAnalyticsRoute,
+  InstructorAssignmentsRoute: InstructorAssignmentsRoute,
+  InstructorProfileRoute: InstructorProfileRoute,
+  InstructorStudentsRoute: InstructorStudentsRoute,
+  InstructorIndexRoute: InstructorIndexRoute,
+  InstructorCoursesNewRoute: InstructorCoursesNewRoute,
+  InstructorCoursesIndexRoute: InstructorCoursesIndexRoute,
+}
+
+const InstructorRouteWithChildren = InstructorRoute._addFileChildren(
+  InstructorRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  InstructorRoute: InstructorRoute,
+  InstructorRoute: InstructorRouteWithChildren,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
