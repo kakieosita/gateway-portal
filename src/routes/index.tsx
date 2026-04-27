@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useAuthStore } from "@/stores/auth-store";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -64,6 +65,8 @@ const screens = [
 ];
 
 function Index() {
+  const { user } = useAuthStore();
+
   return (
     <div className="min-h-screen bg-gradient-soft">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
@@ -82,9 +85,11 @@ function Index() {
           <Link to="/instructor" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
             Instructor
           </Link>
-          <Link to="/admin" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
-            Admin
-          </Link>
+          {user?.role === "admin" && (
+            <Link to="/admin" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
+              Admin
+            </Link>
+          )}
           <Link to="/alumni" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
             Alumni
           </Link>

@@ -45,8 +45,13 @@ function LoginPage() {
   const onSubmit = async (data: FormData) => {
     setServerError(null);
     try {
-      await authApi.login({ email: data.email, password: data.password });
-      navigate({ to: "/" });
+      const { user } = await authApi.login({ email: data.email, password: data.password });
+      
+      if (user.role === "admin") navigate({ to: "/admin" });
+      else if (user.role === "instructor") navigate({ to: "/instructor" });
+      else if (user.role === "alumni") navigate({ to: "/alumni" });
+      else if (user.role === "partner") navigate({ to: "/partner" });
+      else navigate({ to: "/dashboard" });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Something went wrong");
     }
@@ -54,9 +59,17 @@ function LoginPage() {
 
   const handleGoogle = async () => {
     setLoadingGoogle(true);
+    setServerError(null);
     try {
-      await authApi.google();
-      navigate({ to: "/" });
+      const { user } = await authApi.google();
+      
+      if (user.role === "admin") navigate({ to: "/admin" });
+      else if (user.role === "instructor") navigate({ to: "/instructor" });
+      else if (user.role === "alumni") navigate({ to: "/alumni" });
+      else if (user.role === "partner") navigate({ to: "/partner" });
+      else navigate({ to: "/dashboard" });
+    } catch (e) {
+      setServerError(e instanceof Error ? e.message : "Google sign in failed");
     } finally {
       setLoadingGoogle(false);
     }

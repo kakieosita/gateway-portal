@@ -2,18 +2,51 @@ import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { AlumniSidebar } from "@/components/alumni/AlumniSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
+import { useAuthStore } from "@/stores/auth-store";
+import { redirect } from "@tanstack/react-router";
+
 export const Route = createFileRoute("/alumni")({
+  beforeLoad: async ({ location }) => {
+    const { user, initialized } = useAuthStore.getState();
+    
+    // Don't guard the login page itself
+    if (location.pathname === "/alumni/login") return;
+
+    if (initialized && !user) {
+      throw redirect({
+        to: "/alumni/login",
+        search: {
+          redirect: location.href,
+        },
+      });
+    }
+
+    if (user && user.role !== "alumni" && user.role !== "admin") {
+      throw redirect({ to: "/" });
+    }
+  },
   component: AlumniLayout,
 });
 
 function AlumniLayout() {
   const matchRoute = useMatchRoute();
   const isLoginPage = matchRoute({ to: "/alumni/login" });
+  const { user, loading } = useAuthStore();
 
   // Login page renders standalone — no sidebar
   if (isLoginPage) {
     return <Outlet />;
   }
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <SidebarProvider>

@@ -1,24 +1,30 @@
-// Mock API service layer — swap with real endpoints later.
-// All methods simulate network latency and return JWT-ish tokens.
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
+  checkActionCode,
+  applyActionCode,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+  sendEmailVerification
+} from "firebase/auth";
+import { doc, setDoc, getDoc, Timestamp } from "firebase/firestore";
+import { auth, db } from "./firebase";
+import { usersCollection } from "./db/collections";
 
 const TOKEN_KEY = "edu_auth_token";
 
-function delay(ms: number) {
-  return new Promise((res) => setTimeout(res, ms));
-}
-
-function fakeJwt(payload: Record<string, unknown>) {
-  const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const body = btoa(JSON.stringify({ ...payload, iat: Date.now() }));
-  return `${header}.${body}.mock-signature`;
-}
-
-export type Role = "student" | "instructor";
+export type Role = "student" | "instructor" | "alumni" | "partner" | "admin";
 
 export interface LoginInput {
   email: string;
   password: string;
 }
+
 export interface SignupInput {
   fullName: string;
   email: string;
@@ -28,53 +34,110 @@ export interface SignupInput {
 
 export const authApi = {
   async login(input: LoginInput) {
-    await delay(900);
-    if (input.email === "fail@test.com") {
-      throw new Error("Invalid email or password");
+    const userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
+    
+    // Check if email is verified
+    if (!userCredential.user.emailVerified) {
+      // Optional: resend verification email if they try to login without verification
+      await sendEmailVerification(userCredential.user);
+      throw new Error("Please verify your email address. A new verification link has been sent to your inbox.");
     }
-    const token = fakeJwt({ sub: input.email, role: "student" });
+
+    const token = await userCredential.user.getIdToken();
     sessionStorage.setItem(TOKEN_KEY, token);
-    return { token, user: { email: input.email } };
+
+    // Fetch the user's role from Firestore
+    const userDoc = await getDoc(doc(usersCollection, userCredential.user.uid));
+    const role = userDoc.exists() ? userDoc.data().role : "student";
+
+    return { token, user: { email: userCredential.user.email, role } };
   },
 
   async signup(input: SignupInput) {
-    await delay(1100);
-    if (input.email === "taken@test.com") {
-      throw new Error("An account with this email already exists");
-    }
-    const token = fakeJwt({ sub: input.email, role: input.role });
+    // 1. Create the user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, input.email, input.password);
+    
+    // 2. Update their display name in Auth
+    await updateProfile(userCredential.user, { displayName: input.fullName });
+
+    // 3. Create the user document in Firestore
+    await setDoc(doc(usersCollection, userCredential.user.uid), {
+      id: userCredential.user.uid,
+      email: input.email,
+      displayName: input.fullName,
+      photoURL: null,
+      role: input.role,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+    
+    // 4. Send verification email
+    await sendEmailVerification(userCredential.user);
+
+    const token = await userCredential.user.getIdToken();
     sessionStorage.setItem(TOKEN_KEY, token);
+
     return { token, user: { email: input.email, role: input.role } };
   },
 
   async forgotPassword(email: string) {
-    await delay(900);
+    await sendPasswordResetEmail(auth, email);
     return { message: `Reset link sent to ${email}` };
   },
 
-  async resetPassword(_token: string, _password: string) {
-    await delay(900);
+  async resetPassword(actionCode: string, password: string) {
+    // Verify the code before confirming
+    await verifyPasswordResetCode(auth, actionCode);
+    await confirmPasswordReset(auth, actionCode, password);
     return { message: "Password updated" };
   },
 
-  async verifyEmail(code: string) {
-    await delay(1200);
-    if (code.length !== 6) throw new Error("Invalid verification code");
+  async verifyEmail(actionCode: string) {
+    // Verify the email action code
+    await checkActionCode(auth, actionCode);
+    await applyActionCode(auth, actionCode);
     return { verified: true };
   },
 
   async google() {
-    await delay(700);
-    const token = fakeJwt({ sub: "google-user@example.com", provider: "google" });
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    
+    // Check if user already exists in Firestore
+    const userDocRef = doc(usersCollection, userCredential.user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    let role: Role = "student";
+
+    // If it's a new Google user, create their document in Firestore
+    if (!userDocSnap.exists()) {
+      await setDoc(userDocRef, {
+        id: userCredential.user.uid,
+        email: userCredential.user.email || "",
+        displayName: userCredential.user.displayName || "Google User",
+        photoURL: userCredential.user.photoURL || null,
+        role: "student", // default role for social login
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+    } else {
+      role = userDocSnap.data().role as Role;
+    }
+
+    const token = await userCredential.user.getIdToken();
     sessionStorage.setItem(TOKEN_KEY, token);
-    return { token };
+
+    return { token, user: { email: userCredential.user.email, role } };
   },
 
-  logout() {
+  async logout() {
+    await signOut(auth);
     sessionStorage.removeItem(TOKEN_KEY);
   },
 
   getToken() {
+    // Note: In a robust app, we'd rely on Firebase's auth state listener (onAuthStateChanged).
+    // For synchronous router checks, we rely on the sessionStorage marker.
     return sessionStorage.getItem(TOKEN_KEY);
   },
 };

@@ -54,10 +54,21 @@ function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => vo
   );
 }
 
+import { User } from "./lib/db/schema";
+
+export interface MyRouterContext {
+  auth: {
+    user: User | null;
+    loading: boolean;
+  };
+}
+
 export const getRouter = () => {
   const router = createRouter({
     routeTree,
-    context: {},
+    context: {
+      auth: undefined!, // This will be provided by the Root component
+    },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,

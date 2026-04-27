@@ -40,6 +40,7 @@ type FormData = z.infer<typeof schema>;
 function SignupPage() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
 
   const {
     register,
@@ -65,9 +66,27 @@ function SignupPage() {
         password: data.password,
         role: data.role,
       });
+      
       navigate({ to: "/verify-email", search: { email: data.email } });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Something went wrong");
+    }
+  };
+
+  const handleGoogle = async () => {
+    setLoadingGoogle(true);
+    try {
+      const { user } = await authApi.google();
+      
+      if (user.role === "admin") navigate({ to: "/admin" });
+      else if (user.role === "instructor") navigate({ to: "/instructor" });
+      else if (user.role === "alumni") navigate({ to: "/alumni" });
+      else if (user.role === "partner") navigate({ to: "/partner" });
+      else navigate({ to: "/dashboard" });
+    } catch (e) {
+      setServerError(e instanceof Error ? e.message : "Google sign up failed");
+    } finally {
+      setLoadingGoogle(false);
     }
   };
 
@@ -158,7 +177,11 @@ function SignupPage() {
         </SubmitButton>
 
         <Divider />
-        <SocialButton provider="google" />
+        <SocialButton
+          provider="google"
+          onClick={handleGoogle}
+          disabled={loadingGoogle}
+        />
       </form>
     </AuthLayout>
   );

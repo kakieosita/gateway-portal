@@ -70,8 +70,8 @@ function VerifyEmailPage() {
       title="Verify your email"
       subtitle={
         email
-          ? `We sent a 6-digit code to ${email}.`
-          : "Enter the 6-digit code we sent to your email."
+          ? `We sent a verification link to ${email}. Please check your inbox and click the link to activate your account.`
+          : "Please check your inbox for a verification link to activate your account."
       }
       footer={
         <span className="text-muted-foreground">
@@ -82,43 +82,41 @@ function VerifyEmailPage() {
         </span>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      <div className="space-y-6">
         <div className="flex justify-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">
-            <MailCheck className="h-7 w-7" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-primary text-primary-foreground shadow-glow animate-pulse">
+            <MailCheck className="h-10 w-10" />
           </div>
         </div>
 
-        {error && <InlineAlert variant="error" message={error} />}
-        {success && <InlineAlert variant="success" message="Email verified! Redirecting..." />}
-
-        <div className="flex justify-between gap-2" onPaste={onPaste}>
-          {digits.map((d, i) => (
-            <input
-              key={i}
-              ref={(el) => { refs.current[i] = el; }}
-              value={d}
-              onChange={(e) => setDigit(i, e.target.value)}
-              onKeyDown={(e) => onKey(i, e)}
-              inputMode="numeric"
-              maxLength={1}
-              aria-label={`Digit ${i + 1}`}
-              className="h-14 w-12 rounded-xl border border-border bg-card text-center font-display text-2xl font-bold text-foreground outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/15"
-            />
-          ))}
+        <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-soft">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            We've sent an activation link to your email address. 
+            Please click the link in the message to verify your account.
+          </p>
         </div>
 
-        <SubmitButton type="submit" loading={loading} disabled={digits.join("").length !== 6}>
-          {loading ? "Verifying..." : "Verify email"}
-        </SubmitButton>
-
-        <p className="text-center text-sm text-muted-foreground">
-          Didn't get the code?{" "}
-          <button type="button" className="font-semibold text-primary hover:underline">
-            Resend in 30s
+        <div className="space-y-3">
+          <Link
+            to="/login"
+            className="flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-glow"
+          >
+            Back to Sign in
+          </Link>
+          
+          <button 
+            type="button"
+            className="flex w-full items-center justify-center rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-muted"
+            onClick={() => {
+              // Standard Firebase doesn't have a direct "resend" without the user object
+              // But we can tell them to try signing up again or contact support
+              alert("Check your spam folder. If you still don't see it, try signing in to trigger a new link.");
+            }}
+          >
+            Didn't receive email?
           </button>
-        </p>
-      </form>
+        </div>
+      </div>
     </AuthLayout>
   );
 }
