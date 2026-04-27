@@ -165,3 +165,102 @@ export const mockUser = {
   phone: "+234 803 456 7890",
   location: "Owerri, Imo State",
 };
+
+export type Quiz = {
+  id: string;
+  title: string;
+  course: string;
+  duration: number; // in minutes
+  questions: number;
+  status: "available" | "completed" | "missed";
+  score?: number;
+};
+
+export const mockQuizzes: Quiz[] = [
+  { id: "q1", title: "React Fundamentals", course: "Full-Stack Web Development", duration: 30, questions: 20, status: "available" },
+  { id: "q2", title: "Intro to Python Data Types", course: "Data Science Foundations", duration: 15, questions: 10, status: "completed", score: 85 },
+  { id: "q3", title: "AWS IAM & Security", course: "Cloud Engineering with AWS", duration: 45, questions: 30, status: "available" },
+];
+
+export type Grade = {
+  id: string;
+  course: string;
+  score: number;
+  grade: "A" | "B" | "C" | "D" | "F";
+  credits: number;
+};
+
+export const mockGrades: Grade[] = [
+  { id: "g1", course: "Mobile App Development with React Native", score: 92, grade: "A", credits: 4 },
+  { id: "g2", course: "Intro to Programming with Python", score: 88, grade: "B", credits: 3 },
+  { id: "g3", course: "Git & GitHub Mastery", score: 95, grade: "A", credits: 2 },
+];
+
+export type Attendance = {
+  id: string;
+  course: string;
+  totalClasses: number;
+  attendedClasses: number;
+};
+
+export const mockAttendance: Attendance[] = [
+  { id: "at1", course: "Full-Stack Web Development", totalClasses: 24, attendedClasses: 22 },
+  { id: "at2", course: "Data Science Foundations", totalClasses: 20, attendedClasses: 15 },
+  { id: "at3", course: "Cloud Engineering with AWS", totalClasses: 18, attendedClasses: 18 },
+];
+
+export type Invoice = {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+  status: "paid" | "pending" | "overdue";
+};
+
+export const mockInvoices: Invoice[] = [
+  { id: "inv1", description: "Tuition Fee - Fall Semester", amount: 150000, date: "2026-01-10", status: "paid" },
+  { id: "inv2", description: "Cloud AWS Certification Fee", amount: 45000, date: "2026-03-15", status: "paid" },
+  { id: "inv3", description: "Tuition Fee - Spring Semester", amount: 150000, date: "2026-05-10", status: "pending" },
+];
+
+export type ForumPost = {
+  id: string;
+  author: string;
+  title: string;
+  category: string;
+  replies: number;
+  lastActive: string;
+};
+
+export const mockForumPosts: ForumPost[] = [
+  { id: "fp1", author: "Chinedu E.", title: "Help with React useEffect dependencies", category: "Full-Stack Web Development", replies: 12, lastActive: "1 hour ago" },
+  { id: "fp2", author: "Aisha M.", title: "Best resources for learning Pandas?", category: "Data Science", replies: 5, lastActive: "3 hours ago" },
+  { id: "fp3", author: "Admin", title: "Welcome to the Spring 2026 Cohort!", category: "General Announcements", replies: 45, lastActive: "1 day ago" },
+];
+
+export type Event = {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  type: "Workshop" | "Webinar" | "Social";
+};
+
+export const mockEvents: Event[] = [
+  { id: "ev1", title: "Tech Career Fair 2026", date: "2026-05-15", time: "10:00 AM", type: "Social" },
+  { id: "ev2", title: "Mastering TypeScript Workshop", date: "2026-04-28", time: "2:00 PM", type: "Workshop" },
+  { id: "ev3", title: "Industry Insights: AI in Fintech", date: "2026-05-02", time: "5:00 PM", type: "Webinar" },
+];
+
+export type Announcement = {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+};
+
+export const mockAnnouncements: Announcement[] = [
+  { id: "an1", title: "Platform Maintenance", content: "The portal will undergo scheduled maintenance on Sunday from 2 AM to 4 AM.", date: "Today" },
+  { id: "an2", title: "New Course Available", content: "Check out the new Advanced Go Programming course in the catalog.", date: "Yesterday" },
+];
+

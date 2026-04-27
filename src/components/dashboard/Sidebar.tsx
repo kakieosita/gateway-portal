@@ -1,20 +1,27 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, BookOpen, FileText, Award, User, LogOut, X } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, Award, User, LogOut, X, Search, GraduationCap, CalendarCheck, Wallet, MessageSquare, Calendar } from "lucide-react";
 import upskillLogo from "@/assets/upskill-logo.png";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
-  to: "/dashboard" | "/dashboard/courses" | "/dashboard/assignments" | "/dashboard/certificates" | "/dashboard/profile";
+  to: string;
   label: string;
-  icon: typeof LayoutDashboard;
+  icon: any;
   exact?: boolean;
 };
 
 const items: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/courses", label: "My Courses", icon: BookOpen },
+  { to: "/dashboard/catalog", label: "Course Catalog", icon: Search },
   { to: "/dashboard/assignments", label: "Assignments", icon: FileText },
+  { to: "/dashboard/quizzes", label: "Quizzes", icon: CalendarCheck },
+  { to: "/dashboard/grades", label: "Grades", icon: GraduationCap },
+  { to: "/dashboard/attendance", label: "Attendance", icon: User },
   { to: "/dashboard/certificates", label: "Certificates", icon: Award },
+  { to: "/dashboard/finance", label: "Finance", icon: Wallet },
+  { to: "/dashboard/community", label: "Community", icon: MessageSquare },
+  { to: "/dashboard/events", label: "Events", icon: Calendar },
   { to: "/dashboard/profile", label: "Profile", icon: User },
 ];
 
@@ -59,7 +66,7 @@ export function DashboardSidebar({ open, onClose }: { open: boolean; onClose: ()
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 px-4 py-2">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-2 custom-scrollbar">
           {items.map((item) => {
             const isActive = item.exact ? path === item.to : path.startsWith(item.to);
             return (

@@ -15,6 +15,7 @@ function AssignmentsPage() {
   const [openSubmissions, setOpenSubmissions] = useState<string | null>(null);
   const [gradingId, setGradingId] = useState<string | null>(null);
   const [gradeInput, setGradeInput] = useState("");
+  const [feedbackInput, setFeedbackInput] = useState("");
   const [newAssignment, setNewAssignment] = useState({ title: "", course: "", type: "assignment", dueDate: "" });
 
   const submit = () => {
@@ -31,7 +32,7 @@ function AssignmentsPage() {
         </div>
         <button
           onClick={() => setOpenCreate(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft hover:shadow-glow"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft hover:shadow-glow transition"
         >
           <Plus className="h-4 w-4" /> New assignment
         </button>
@@ -43,7 +44,7 @@ function AssignmentsPage() {
           const gradedRate = a.submissions > 0 ? Math.round((a.graded / a.submissions) * 100) : 0;
           const Icon = a.type === "quiz" ? ClipboardCheck : FileText;
           return (
-            <article key={a.id} className="rounded-2xl border border-border bg-card p-5 shadow-card">
+            <article key={a.id} className="rounded-2xl border border-border bg-card p-5 shadow-card hover:border-primary/30 transition">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground shadow-soft">
                   <Icon className="h-5 w-5" />
@@ -78,7 +79,7 @@ function AssignmentsPage() {
                 <span className="text-xs text-muted-foreground">Due {new Date(a.dueDate).toLocaleDateString()}</span>
                 <button
                   onClick={() => setOpenSubmissions(a.id)}
-                  className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/80"
+                  className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/80 transition"
                 >
                   View submissions
                 </button>
@@ -94,7 +95,7 @@ function AssignmentsPage() {
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-card" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-display text-lg font-bold">New assignment</h3>
-              <button onClick={() => setOpenCreate(false)} className="rounded-lg p-1.5 hover:bg-muted">
+              <button onClick={() => setOpenCreate(false)} className="rounded-lg p-1.5 hover:bg-muted transition">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -105,7 +106,7 @@ function AssignmentsPage() {
                   value={newAssignment.title}
                   onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
                   placeholder="e.g. Build a CRUD API"
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
                 />
               </div>
               <div>
@@ -114,7 +115,7 @@ function AssignmentsPage() {
                   value={newAssignment.course}
                   onChange={(e) => setNewAssignment({ ...newAssignment, course: e.target.value })}
                   placeholder="Course name"
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -123,7 +124,7 @@ function AssignmentsPage() {
                   <select
                     value={newAssignment.type}
                     onChange={(e) => setNewAssignment({ ...newAssignment, type: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
                   >
                     <option value="assignment">Assignment</option>
                     <option value="quiz">Quiz</option>
@@ -135,16 +136,16 @@ function AssignmentsPage() {
                     type="date"
                     value={newAssignment.dueDate}
                     onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
                   />
                 </div>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
-              <button onClick={() => setOpenCreate(false)} className="rounded-xl border border-border px-4 py-2 text-sm font-semibold hover:bg-muted">
+              <button onClick={() => setOpenCreate(false)} className="rounded-xl border border-border px-4 py-2 text-sm font-semibold hover:bg-muted transition">
                 Cancel
               </button>
-              <button onClick={submit} className="rounded-xl bg-gradient-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-soft hover:shadow-glow">
+              <button onClick={submit} className="rounded-xl bg-gradient-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-soft hover:shadow-glow transition">
                 Create
               </button>
             </div>
@@ -155,68 +156,112 @@ function AssignmentsPage() {
       {/* Submissions modal */}
       {openSubmissions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm" onClick={() => setOpenSubmissions(null)}>
-          <div className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-card" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-border p-5">
+          <div className="w-full max-w-3xl rounded-2xl border border-border bg-card shadow-card flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-border p-5 shrink-0">
               <div>
                 <h3 className="font-display text-lg font-bold">Submissions</h3>
                 <p className="text-xs text-muted-foreground">{assignments.find((a) => a.id === openSubmissions)?.title}</p>
               </div>
-              <button onClick={() => setOpenSubmissions(null)} className="rounded-lg p-1.5 hover:bg-muted">
+              <button onClick={() => setOpenSubmissions(null)} className="rounded-lg p-1.5 hover:bg-muted transition">
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <ul className="max-h-96 divide-y divide-border overflow-auto">
+            <ul className="flex-1 divide-y divide-border overflow-y-auto">
               {submissions.filter((s) => s.assignmentId === openSubmissions).map((sub) => (
-                <li key={sub.id} className="flex items-center gap-3 p-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                    <FileText className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">{sub.studentName}</p>
-                    <p className="truncate text-xs text-muted-foreground">{sub.fileName} · {sub.submittedAt}</p>
-                  </div>
-                  {sub.status === "graded" ? (
-                    <span className="rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">{sub.grade}</span>
-                  ) : gradingId === sub.id ? (
-                    <div className="flex items-center gap-1">
-                      <input
-                        autoFocus
-                        value={gradeInput}
-                        onChange={(e) => setGradeInput(e.target.value)}
-                        placeholder="A / 90"
-                        className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-xs outline-none focus:border-primary"
-                      />
+                <li key={sub.id} className="p-4 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold">{sub.studentName}</p>
+                      <p className="truncate text-xs text-muted-foreground">{sub.fileName} · {sub.submittedAt}</p>
+                    </div>
+                    {sub.status === "graded" ? (
+                      <span className="rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">{sub.grade}</span>
+                    ) : gradingId !== sub.id && (
                       <button
                         onClick={() => {
-                          if (gradeInput.trim()) {
-                            gradeSubmission(sub.id, gradeInput.trim());
-                            setGradingId(null);
-                            setGradeInput("");
-                          }
+                          setGradingId(sub.id);
+                          setGradeInput("");
+                          setFeedbackInput("");
                         }}
-                        className="rounded-lg bg-gradient-primary px-3 py-1 text-xs font-semibold text-primary-foreground"
+                        className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/80 transition"
                       >
-                        Save
+                        Grade
                       </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setGradingId(sub.id);
-                        setGradeInput("");
-                      }}
-                      className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/80"
-                    >
-                      Grade
+                    )}
+                    <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted transition" aria-label="Download">
+                      <Download className="h-4 w-4" />
                     </button>
+                  </div>
+
+                  {(gradingId === sub.id) && (
+                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                       <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                             <label className="mb-1 block text-[10px] font-bold uppercase text-primary">Score / Grade</label>
+                             <input
+                                autoFocus
+                                value={gradeInput}
+                                onChange={(e) => setGradeInput(e.target.value)}
+                                placeholder="e.g. A or 95"
+                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:border-primary transition"
+                             />
+                          </div>
+                          <div className="flex-1">
+                             <p className="text-[10px] font-bold uppercase text-muted-foreground">Quick Feedback</p>
+                             <div className="flex gap-1 mt-1">
+                                {['Great work!', 'Improve logic', 'Check docs'].map(f => (
+                                   <button 
+                                     key={f}
+                                     onClick={() => setFeedbackInput(f)}
+                                     className="text-[9px] px-1.5 py-1 rounded bg-muted hover:bg-accent transition"
+                                   >{f}</button>
+                                ))}
+                             </div>
+                          </div>
+                       </div>
+                       <div>
+                          <label className="mb-1 block text-[10px] font-bold uppercase text-primary">Detailed Feedback</label>
+                          <textarea
+                             value={feedbackInput}
+                             onChange={(e) => setFeedbackInput(e.target.value)}
+                             rows={3}
+                             placeholder="Provide constructive criticism..."
+                             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs outline-none focus:border-primary resize-none transition"
+                          />
+                       </div>
+                       <div className="flex justify-end gap-2">
+                          <button 
+                             onClick={() => setGradingId(null)}
+                             className="text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-muted transition"
+                          >Cancel</button>
+                          <button
+                             onClick={() => {
+                               if (gradeInput.trim()) {
+                                 gradeSubmission(sub.id, gradeInput.trim(), feedbackInput.trim());
+                                 setGradingId(null);
+                                 setGradeInput("");
+                                 setFeedbackInput("");
+                               }
+                             }}
+                             className="rounded-lg bg-gradient-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-soft transition hover:shadow-glow"
+                          >Save Grade</button>
+                       </div>
+                    </div>
                   )}
-                  <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted" aria-label="Download">
-                    <Download className="h-4 w-4" />
-                  </button>
+
+                  {sub.status === "graded" && sub.feedback && (
+                    <div className="rounded-xl border border-border bg-muted/20 p-3 ml-12">
+                       <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Feedback Provided</p>
+                       <p className="text-xs italic text-muted-foreground">"{sub.feedback}"</p>
+                    </div>
+                  )}
                 </li>
               ))}
               {submissions.filter((s) => s.assignmentId === openSubmissions).length === 0 && (
-                <li className="p-12 text-center text-sm text-muted-foreground">No submissions yet.</li>
+                <li className="p-12 text-center text-sm text-muted-foreground italic">No submissions yet.</li>
               )}
             </ul>
           </div>
@@ -225,3 +270,4 @@ function AssignmentsPage() {
     </div>
   );
 }
+

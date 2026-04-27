@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Users, BookOpen, Banknote, TrendingUp, GraduationCap, Star, Activity as ActivityIcon } from "lucide-react";
+import { Users, BookOpen, Banknote, TrendingUp, GraduationCap, Star, Activity as ActivityIcon, Calendar, ClipboardCheck, Plus, Upload, Bell } from "lucide-react";
 import { useInstructorStore } from "@/stores/instructor-store";
 import { StatCard } from "@/components/instructor/StatCard";
 
@@ -14,14 +14,26 @@ function InstructorOverview() {
   const students = useInstructorStore((s) => s.students);
   const activity = useInstructorStore((s) => s.activity);
   const profile = useInstructorStore((s) => s.profile);
+  const schedules = useInstructorStore((s) => s.schedules);
+  const submissions = useInstructorStore((s) => s.submissions);
 
   const totalStudents = courses.reduce((sum, c) => sum + c.students, 0);
   const totalRevenue = courses.reduce((sum, c) => sum + c.revenue, 0);
-  const published = courses.filter((c) => c.status === "published").length;
-  const avgRating = (
-    courses.filter((c) => c.rating > 0).reduce((sum, c) => sum + c.rating, 0) /
-    Math.max(1, courses.filter((c) => c.rating > 0).length)
-  ).toFixed(1);
+  const pendingGrading = submissions.filter((s) => s.status === "pending").length;
+  const upcomingClasses = schedules.filter((s) => new Date(s.date) >= new Date()).length;
+
+  const stats = [
+    { label: "Total Students", value: totalStudents.toLocaleString(), delta: "+12%", icon: Users, tone: "primary" as const },
+    { label: "Revenue", value: naira(totalRevenue), delta: "+8.4%", icon: Banknote, tone: "success" as const },
+    { label: "Pending Grading", value: `${pendingGrading}`, delta: "Tasks", icon: ClipboardCheck, tone: "warning" as const },
+    { label: "Upcoming Classes", value: `${upcomingClasses}`, delta: "Next 7 days", icon: Calendar, tone: "mint" as const },
+  ];
+
+  const quickActions = [
+    { label: "New Class Session", icon: Plus, to: "/instructor/schedule", color: "bg-primary text-primary-foreground" },
+    { label: "Upload Content", icon: Upload, to: "/instructor/courses/new", color: "bg-mint text-mint-foreground" },
+    { label: "Post Announcement", icon: Bell, to: "/instructor/announcements", color: "bg-warning text-warning-foreground" },
+  ];
 
   const iconMap = {
     enroll: Users,
@@ -31,19 +43,32 @@ function InstructorOverview() {
   } as const;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-bold">Welcome back, {profile.name.split(" ")[1] ?? profile.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Here's what's happening across your courses today.
-        </p>
+    <div className="space-y-6 pb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold">Welcome back, {profile.name.split(" ")[1] ?? profile.name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Here's what's happening across your courses today.
+          </p>
+        </div>
+        <div className="flex gap-2">
+           {quickActions.map((action) => (
+             <Link
+               key={action.label}
+               to={action.to}
+               className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-xs font-semibold shadow-soft hover:bg-accent transition"
+             >
+               <action.icon className="h-3.5 w-3.5" />
+               {action.label}
+             </Link>
+           ))}
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Students" value={totalStudents.toLocaleString()} delta="+12% this month" icon={Users} tone="primary" />
-        <StatCard label="Published Courses" value={`${published}`} delta={`${courses.length - published} draft`} icon={BookOpen} tone="mint" />
-        <StatCard label="Revenue" value={naira(totalRevenue)} delta="+8.4% MoM" icon={Banknote} tone="success" />
-        <StatCard label="Avg Rating" value={`${avgRating} ★`} delta="Across published courses" icon={Star} tone="primary" />
+        {stats.map((s) => (
+          <StatCard key={s.label} {...s} />
+        ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -90,7 +115,7 @@ function InstructorOverview() {
           </div>
           <ul className="space-y-3">
             {activity.map((a) => {
-              const Icon = iconMap[a.type];
+              const Icon = iconMap[a.type as keyof typeof iconMap] || ActivityIcon;
               return (
                 <li key={a.id} className="flex gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
@@ -106,6 +131,29 @@ function InstructorOverview() {
           </ul>
         </section>
       </div>
+
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-display text-lg font-semibold">Upcoming Schedule</h2>
+          <Link to="/instructor/schedule" className="text-xs font-semibold text-primary hover:underline">
+            Manage schedule
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+           {schedules.slice(0, 3).map((s) => (
+             <div key={s.id} className="p-4 rounded-xl border border-border bg-muted/30">
+                <div className="flex items-center justify-between mb-2">
+                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.type === 'virtual' ? 'bg-primary/10 text-primary' : 'bg-mint/10 text-mint'}`}>
+                      {s.type}
+                   </span>
+                   <span className="text-xs font-semibold">{s.time}</span>
+                </div>
+                <h3 className="font-semibold text-sm line-clamp-1">{s.title}</h3>
+                <p className="text-xs text-muted-foreground mt-1 truncate">{s.location}</p>
+             </div>
+           ))}
+        </div>
+      </section>
 
       <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
         <div className="mb-4 flex items-center justify-between">
@@ -150,22 +198,7 @@ function InstructorOverview() {
           </table>
         </div>
       </section>
-
-      <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-5">
-        <div className="flex items-center gap-3">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          <div>
-            <p className="font-display text-sm font-semibold">Want deeper insights?</p>
-            <p className="text-xs text-muted-foreground">See engagement, completion, and revenue trends in Analytics.</p>
-          </div>
-          <Link
-            to="/instructor/analytics"
-            className="ml-auto rounded-xl bg-gradient-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-soft transition hover:shadow-glow"
-          >
-            Open analytics
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }
+

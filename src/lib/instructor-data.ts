@@ -40,6 +40,7 @@ export type Submission = {
   submittedAt: string;
   status: "pending" | "graded";
   grade?: string;
+  feedback?: string;
   fileName: string;
 };
 
@@ -48,6 +49,47 @@ export type ActivityItem = {
   type: "enroll" | "submission" | "review" | "completion";
   text: string;
   time: string;
+};
+
+export type ScheduleSession = {
+  id: string;
+  title: string;
+  courseId: string;
+  date: string;
+  time: string;
+  type: "physical" | "virtual";
+  location: string; // "Hall A" or "Zoom Link"
+};
+
+export type AttendanceRecord = {
+  id: string;
+  sessionId: string;
+  studentId: string;
+  status: "present" | "absent";
+};
+
+export type Announcement = {
+  id: string;
+  courseId: string;
+  title: string;
+  content: string;
+  date: string;
+};
+
+export type EarningRecord = {
+  id: string;
+  amount: number;
+  date: string;
+  status: "paid" | "pending";
+};
+
+export type Credential = {
+  id: string;
+  title: string;
+  issuer: string;
+  date: string;
+  status: "verified" | "pending";
+  file?: string;
 };
 
 const thumbs = [
@@ -94,10 +136,32 @@ export const instructorAssignments: InstructorAssignment[] = [
 
 export const submissions: Submission[] = [
   { id: "sub1", assignmentId: "ia1", studentName: "Adaeze Okonkwo", submittedAt: "2 hours ago", status: "pending", fileName: "rest-api.zip" },
-  { id: "sub2", assignmentId: "ia1", studentName: "Tunde Bakare", submittedAt: "5 hours ago", status: "graded", grade: "A", fileName: "express-api.zip" },
+  { id: "sub2", assignmentId: "ia1", studentName: "Tunde Bakare", submittedAt: "5 hours ago", status: "graded", grade: "A", feedback: "Excellent implementation of middleware.", fileName: "express-api.zip" },
   { id: "sub3", assignmentId: "ia3", studentName: "Aisha Ibrahim", submittedAt: "Yesterday", status: "pending", fileName: "s3-deploy.pdf" },
-  { id: "sub4", assignmentId: "ia2", studentName: "Emeka Nwosu", submittedAt: "Yesterday", status: "graded", grade: "B+", fileName: "quiz-attempt-1.json" },
-  { id: "sub5", assignmentId: "ia1", studentName: "Ngozi Eze", submittedAt: "2 days ago", status: "graded", grade: "A-", fileName: "api-final.zip" },
+  { id: "sub4", assignmentId: "ia2", studentName: "Emeka Nwosu", submittedAt: "Yesterday", status: "graded", grade: "B+", feedback: "Good effort, but check the closure questions again.", fileName: "quiz-attempt-1.json" },
+  { id: "sub5", assignmentId: "ia1", studentName: "Ngozi Eze", submittedAt: "2 days ago", status: "graded", grade: "A-", feedback: "Very clean code.", fileName: "api-final.zip" },
+];
+
+export const instructorSchedules: ScheduleSession[] = [
+  { id: "sess1", title: "Advanced React Hooks", courseId: "ic1", date: "2026-04-24", time: "14:00", type: "virtual", location: "https://zoom.us/j/123456789" },
+  { id: "sess2", title: "AWS Architecture Workshop", courseId: "ic3", date: "2026-04-25", time: "10:00", type: "physical", location: "Hall C, Main Campus" },
+  { id: "sess3", title: "TypeScript Interface Q&A", courseId: "ic2", date: "2026-04-26", time: "16:30", type: "virtual", location: "https://meet.google.com/abc-defg-hij" },
+];
+
+export const instructorAnnouncements: Announcement[] = [
+  { id: "an1", courseId: "ic1", title: "Welcome to Week 4!", content: "This week we dive into performance optimization and server-side rendering.", date: "2026-04-20" },
+  { id: "an2", courseId: "ic3", title: "Assignment Deadline Extended", content: "The AWS deployment assignment is now due on Friday, 30th April.", date: "2026-04-22" },
+];
+
+export const earningsHistory: EarningRecord[] = [
+  { id: "er1", amount: 245000, date: "2026-03-31", status: "paid" },
+  { id: "er2", amount: 188000, date: "2026-02-28", status: "paid" },
+  { id: "er3", amount: 212000, date: "2026-04-15", status: "pending" },
+];
+
+export const instructorCredentials: Credential[] = [
+  { id: "cr1", title: "AWS Certified Solutions Architect", issuer: "Amazon Web Services", date: "2023-06-15", status: "verified" },
+  { id: "cr2", title: "Google Developers Expert (Web)", issuer: "Google", date: "2024-01-20", status: "verified" },
 ];
 
 export const recentActivity: ActivityItem[] = [

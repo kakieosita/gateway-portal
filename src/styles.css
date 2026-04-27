@@ -1,4 +1,4 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @source "../src";
 @import "tw-animate-css";
 
@@ -134,21 +134,37 @@
   }
 }
 
-@utility bg-gradient-hero {
+.bg-gradient-hero {
   background-image: var(--gradient-hero);
 }
-@utility bg-gradient-primary {
+.bg-gradient-primary {
   background-image: var(--gradient-primary);
 }
-@utility bg-gradient-soft {
+.bg-gradient-soft {
   background-image: var(--gradient-soft);
 }
-@utility shadow-soft {
+.shadow-soft {
   box-shadow: var(--shadow-soft);
 }
-@utility shadow-glow {
+.shadow-glow {
   box-shadow: var(--shadow-glow);
 }
-@utility shadow-card {
+.shadow-card {
   box-shadow: var(--shadow-card);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 20px;
+  }
 }

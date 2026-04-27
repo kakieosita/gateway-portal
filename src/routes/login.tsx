@@ -68,7 +68,7 @@ function LoginPage() {
       subtitle="Sign in to keep learning where you left off."
       footer={
         <span className="text-muted-foreground">
-          New to LumenEd?{" "}
+          New to UST?{" "}
           <Link to="/signup" className="font-semibold text-primary hover:underline">
             Create an account
           </Link>
@@ -125,6 +125,26 @@ function LoginPage() {
           disabled={loadingGoogle}
         />
       </form>
+
+      {/* Cross-portal links */}
+      <div className="mt-6 rounded-xl border border-border bg-muted/40 px-4 py-3 space-y-2">
+        <p className="text-xs text-center font-medium text-muted-foreground uppercase tracking-wide">Other portals</p>
+        <div className="flex items-center justify-center gap-4 text-sm">
+          <Link
+            to="/alumni/login"
+            className="font-medium text-primary hover:underline"
+          >
+            Alumni Portal
+          </Link>
+          <span className="text-border">·</span>
+          <Link
+            to="/partner/login"
+            className="font-medium text-primary hover:underline"
+          >
+            Partner Portal
+          </Link>
+        </div>
+      </div>
     </AuthLayout>
   );
 }

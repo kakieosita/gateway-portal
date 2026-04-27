@@ -82,6 +82,18 @@ function Index() {
           <Link to="/instructor" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
             Instructor
           </Link>
+          <Link to="/admin" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
+            Admin
+          </Link>
+          <Link to="/alumni" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
+            Alumni
+          </Link>
+          <Link to="/partner" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
+            Partner
+          </Link>
+          <Link to="/library" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
+            E-Library
+          </Link>
           <Link to="/login" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:block">
             Sign in
           </Link>

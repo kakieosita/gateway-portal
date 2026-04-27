@@ -9,19 +9,17 @@ import {
   ClipboardList,
   LogOut,
   X,
+  Calendar,
+  CheckCircle,
+  Bell,
+  MessageSquare,
+  Mail as MailIcon,
 } from "lucide-react";
 import upskillLogo from "@/assets/upskill-logo.png";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
-  to:
-    | "/instructor"
-    | "/instructor/courses"
-    | "/instructor/courses/new"
-    | "/instructor/students"
-    | "/instructor/assignments"
-    | "/instructor/analytics"
-    | "/instructor/profile";
+  to: string;
   label: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
@@ -30,9 +28,13 @@ type NavItem = {
 const items: NavItem[] = [
   { to: "/instructor", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/instructor/courses", label: "My Courses", icon: BookOpen },
-  { to: "/instructor/courses/new", label: "Create Course", icon: PlusSquare },
+  { to: "/instructor/schedule", label: "Schedule", icon: Calendar },
+  { to: "/instructor/attendance", label: "Attendance", icon: CheckCircle },
   { to: "/instructor/students", label: "Students", icon: Users },
   { to: "/instructor/assignments", label: "Assignments", icon: ClipboardList },
+  { to: "/instructor/announcements", label: "Announcements", icon: Bell },
+  { to: "/instructor/community", label: "Community", icon: MessageSquare },
+  { to: "/instructor/messages", label: "Messages", icon: MailIcon },
   { to: "/instructor/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/instructor/profile", label: "Profile", icon: User },
 ];

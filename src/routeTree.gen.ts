@@ -12,21 +12,62 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as InstructorRouteImport } from './routes/instructor'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AlumniRouteImport } from './routes/alumni'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PartnerIndexRouteImport } from './routes/partner.index'
+import { Route as LibraryIndexRouteImport } from './routes/library.index'
 import { Route as InstructorIndexRouteImport } from './routes/instructor.index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as AlumniIndexRouteImport } from './routes/alumni.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as PartnerSupportRouteImport } from './routes/partner.support'
+import { Route as PartnerReportsRouteImport } from './routes/partner.reports'
+import { Route as PartnerManagementRouteImport } from './routes/partner.management'
+import { Route as PartnerLoginRouteImport } from './routes/partner.login'
+import { Route as PartnerFinanceRouteImport } from './routes/partner.finance'
+import { Route as LibraryMyListRouteImport } from './routes/library.my-list'
+import { Route as LibraryManageRouteImport } from './routes/library.manage'
+import { Route as LibraryResourceIdRouteImport } from './routes/library.$resourceId'
 import { Route as InstructorStudentsRouteImport } from './routes/instructor.students'
+import { Route as InstructorScheduleRouteImport } from './routes/instructor.schedule'
 import { Route as InstructorProfileRouteImport } from './routes/instructor.profile'
+import { Route as InstructorMessagesRouteImport } from './routes/instructor.messages'
+import { Route as InstructorCommunityRouteImport } from './routes/instructor.community'
+import { Route as InstructorAttendanceRouteImport } from './routes/instructor.attendance'
 import { Route as InstructorAssignmentsRouteImport } from './routes/instructor.assignments'
+import { Route as InstructorAnnouncementsRouteImport } from './routes/instructor.announcements'
 import { Route as InstructorAnalyticsRouteImport } from './routes/instructor.analytics'
+import { Route as DashboardQuizzesRouteImport } from './routes/dashboard.quizzes'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardGradesRouteImport } from './routes/dashboard.grades'
+import { Route as DashboardFinanceRouteImport } from './routes/dashboard.finance'
+import { Route as DashboardEventsRouteImport } from './routes/dashboard.events'
 import { Route as DashboardCoursesRouteImport } from './routes/dashboard.courses'
+import { Route as DashboardCommunityRouteImport } from './routes/dashboard.community'
 import { Route as DashboardCertificatesRouteImport } from './routes/dashboard.certificates'
+import { Route as DashboardCatalogRouteImport } from './routes/dashboard.catalog'
+import { Route as DashboardAttendanceRouteImport } from './routes/dashboard.attendance'
 import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.assignments'
+import { Route as AlumniLoginRouteImport } from './routes/alumni.login'
+import { Route as AlumniEducationRouteImport } from './routes/alumni.education'
+import { Route as AlumniDirectoryRouteImport } from './routes/alumni.directory'
+import { Route as AlumniCommunityRouteImport } from './routes/alumni.community'
+import { Route as AlumniCareerRouteImport } from './routes/alumni.career'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminProgramsRouteImport } from './routes/admin.programs'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
+import { Route as AdminCertificatesRouteImport } from './routes/admin.certificates'
+import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as InstructorCoursesIndexRouteImport } from './routes/instructor.courses.index'
 import { Route as InstructorCoursesNewRouteImport } from './routes/instructor.courses.new'
 import { Route as DashboardCoursesCourseIdRouteImport } from './routes/dashboard.courses.$courseId'
@@ -46,9 +87,19 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PartnerRoute = PartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstructorRoute = InstructorRouteImport.update({
@@ -66,10 +117,30 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlumniRoute = AlumniRouteImport.update({
+  id: '/alumni',
+  path: '/alumni',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PartnerIndexRoute = PartnerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PartnerRoute,
+} as any)
+const LibraryIndexRoute = LibraryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LibraryRoute,
 } as any)
 const InstructorIndexRoute = InstructorIndexRouteImport.update({
   id: '/',
@@ -81,9 +152,64 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AlumniIndexRoute = AlumniIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AlumniRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const PartnerSupportRoute = PartnerSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => PartnerRoute,
+} as any)
+const PartnerReportsRoute = PartnerReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => PartnerRoute,
+} as any)
+const PartnerManagementRoute = PartnerManagementRouteImport.update({
+  id: '/management',
+  path: '/management',
+  getParentRoute: () => PartnerRoute,
+} as any)
+const PartnerLoginRoute = PartnerLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => PartnerRoute,
+} as any)
+const PartnerFinanceRoute = PartnerFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => PartnerRoute,
+} as any)
+const LibraryMyListRoute = LibraryMyListRouteImport.update({
+  id: '/my-list',
+  path: '/my-list',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryManageRoute = LibraryManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryResourceIdRoute = LibraryResourceIdRouteImport.update({
+  id: '/$resourceId',
+  path: '/$resourceId',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const InstructorStudentsRoute = InstructorStudentsRouteImport.update({
   id: '/students',
   path: '/students',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorScheduleRoute = InstructorScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
   getParentRoute: () => InstructorRoute,
 } as any)
 const InstructorProfileRoute = InstructorProfileRouteImport.update({
@@ -91,9 +217,29 @@ const InstructorProfileRoute = InstructorProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => InstructorRoute,
 } as any)
+const InstructorMessagesRoute = InstructorMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorCommunityRoute = InstructorCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorAttendanceRoute = InstructorAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => InstructorRoute,
+} as any)
 const InstructorAssignmentsRoute = InstructorAssignmentsRouteImport.update({
   id: '/assignments',
   path: '/assignments',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorAnnouncementsRoute = InstructorAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
   getParentRoute: () => InstructorRoute,
 } as any)
 const InstructorAnalyticsRoute = InstructorAnalyticsRouteImport.update({
@@ -101,9 +247,29 @@ const InstructorAnalyticsRoute = InstructorAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => InstructorRoute,
 } as any)
+const DashboardQuizzesRoute = DashboardQuizzesRouteImport.update({
+  id: '/quizzes',
+  path: '/quizzes',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardGradesRoute = DashboardGradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardFinanceRoute = DashboardFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardEventsRoute = DashboardEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardCoursesRoute = DashboardCoursesRouteImport.update({
@@ -111,15 +277,95 @@ const DashboardCoursesRoute = DashboardCoursesRouteImport.update({
   path: '/courses',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardCommunityRoute = DashboardCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardCertificatesRoute = DashboardCertificatesRouteImport.update({
   id: '/certificates',
   path: '/certificates',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCatalogRoute = DashboardCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAttendanceRoute = DashboardAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardAssignmentsRoute = DashboardAssignmentsRouteImport.update({
   id: '/assignments',
   path: '/assignments',
   getParentRoute: () => DashboardRoute,
+} as any)
+const AlumniLoginRoute = AlumniLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AlumniRoute,
+} as any)
+const AlumniEducationRoute = AlumniEducationRouteImport.update({
+  id: '/education',
+  path: '/education',
+  getParentRoute: () => AlumniRoute,
+} as any)
+const AlumniDirectoryRoute = AlumniDirectoryRouteImport.update({
+  id: '/directory',
+  path: '/directory',
+  getParentRoute: () => AlumniRoute,
+} as any)
+const AlumniCommunityRoute = AlumniCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => AlumniRoute,
+} as any)
+const AlumniCareerRoute = AlumniCareerRouteImport.update({
+  id: '/career',
+  path: '/career',
+  getParentRoute: () => AlumniRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProgramsRoute = AdminProgramsRouteImport.update({
+  id: '/programs',
+  path: '/programs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCertificatesRoute = AdminCertificatesRouteImport.update({
+  id: '/certificates',
+  path: '/certificates',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
 } as any)
 const InstructorCoursesIndexRoute = InstructorCoursesIndexRouteImport.update({
   id: '/courses/',
@@ -140,23 +386,64 @@ const DashboardCoursesCourseIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/alumni': typeof AlumniRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/instructor': typeof InstructorRouteWithChildren
+  '/library': typeof LibraryRouteWithChildren
   '/login': typeof LoginRoute
+  '/partner': typeof PartnerRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/certificates': typeof AdminCertificatesRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/programs': typeof AdminProgramsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/alumni/career': typeof AlumniCareerRoute
+  '/alumni/community': typeof AlumniCommunityRoute
+  '/alumni/directory': typeof AlumniDirectoryRoute
+  '/alumni/education': typeof AlumniEducationRoute
+  '/alumni/login': typeof AlumniLoginRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
+  '/dashboard/attendance': typeof DashboardAttendanceRoute
+  '/dashboard/catalog': typeof DashboardCatalogRoute
   '/dashboard/certificates': typeof DashboardCertificatesRoute
+  '/dashboard/community': typeof DashboardCommunityRoute
   '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
+  '/dashboard/events': typeof DashboardEventsRoute
+  '/dashboard/finance': typeof DashboardFinanceRoute
+  '/dashboard/grades': typeof DashboardGradesRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/quizzes': typeof DashboardQuizzesRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/announcements': typeof InstructorAnnouncementsRoute
   '/instructor/assignments': typeof InstructorAssignmentsRoute
+  '/instructor/attendance': typeof InstructorAttendanceRoute
+  '/instructor/community': typeof InstructorCommunityRoute
+  '/instructor/messages': typeof InstructorMessagesRoute
   '/instructor/profile': typeof InstructorProfileRoute
+  '/instructor/schedule': typeof InstructorScheduleRoute
   '/instructor/students': typeof InstructorStudentsRoute
+  '/library/$resourceId': typeof LibraryResourceIdRoute
+  '/library/manage': typeof LibraryManageRoute
+  '/library/my-list': typeof LibraryMyListRoute
+  '/partner/finance': typeof PartnerFinanceRoute
+  '/partner/login': typeof PartnerLoginRoute
+  '/partner/management': typeof PartnerManagementRoute
+  '/partner/reports': typeof PartnerReportsRoute
+  '/partner/support': typeof PartnerSupportRoute
+  '/admin/': typeof AdminIndexRoute
+  '/alumni/': typeof AlumniIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/instructor/': typeof InstructorIndexRoute
+  '/library/': typeof LibraryIndexRoute
+  '/partner/': typeof PartnerIndexRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
   '/instructor/courses/new': typeof InstructorCoursesNewRoute
   '/instructor/courses/': typeof InstructorCoursesIndexRoute
@@ -168,16 +455,53 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/certificates': typeof AdminCertificatesRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/programs': typeof AdminProgramsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/alumni/career': typeof AlumniCareerRoute
+  '/alumni/community': typeof AlumniCommunityRoute
+  '/alumni/directory': typeof AlumniDirectoryRoute
+  '/alumni/education': typeof AlumniEducationRoute
+  '/alumni/login': typeof AlumniLoginRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
+  '/dashboard/attendance': typeof DashboardAttendanceRoute
+  '/dashboard/catalog': typeof DashboardCatalogRoute
   '/dashboard/certificates': typeof DashboardCertificatesRoute
+  '/dashboard/community': typeof DashboardCommunityRoute
   '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
+  '/dashboard/events': typeof DashboardEventsRoute
+  '/dashboard/finance': typeof DashboardFinanceRoute
+  '/dashboard/grades': typeof DashboardGradesRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/quizzes': typeof DashboardQuizzesRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/announcements': typeof InstructorAnnouncementsRoute
   '/instructor/assignments': typeof InstructorAssignmentsRoute
+  '/instructor/attendance': typeof InstructorAttendanceRoute
+  '/instructor/community': typeof InstructorCommunityRoute
+  '/instructor/messages': typeof InstructorMessagesRoute
   '/instructor/profile': typeof InstructorProfileRoute
+  '/instructor/schedule': typeof InstructorScheduleRoute
   '/instructor/students': typeof InstructorStudentsRoute
+  '/library/$resourceId': typeof LibraryResourceIdRoute
+  '/library/manage': typeof LibraryManageRoute
+  '/library/my-list': typeof LibraryMyListRoute
+  '/partner/finance': typeof PartnerFinanceRoute
+  '/partner/login': typeof PartnerLoginRoute
+  '/partner/management': typeof PartnerManagementRoute
+  '/partner/reports': typeof PartnerReportsRoute
+  '/partner/support': typeof PartnerSupportRoute
+  '/admin': typeof AdminIndexRoute
+  '/alumni': typeof AlumniIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/instructor': typeof InstructorIndexRoute
+  '/library': typeof LibraryIndexRoute
+  '/partner': typeof PartnerIndexRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
   '/instructor/courses/new': typeof InstructorCoursesNewRoute
   '/instructor/courses': typeof InstructorCoursesIndexRoute
@@ -185,23 +509,64 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/alumni': typeof AlumniRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/instructor': typeof InstructorRouteWithChildren
+  '/library': typeof LibraryRouteWithChildren
   '/login': typeof LoginRoute
+  '/partner': typeof PartnerRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/certificates': typeof AdminCertificatesRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/programs': typeof AdminProgramsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/alumni/career': typeof AlumniCareerRoute
+  '/alumni/community': typeof AlumniCommunityRoute
+  '/alumni/directory': typeof AlumniDirectoryRoute
+  '/alumni/education': typeof AlumniEducationRoute
+  '/alumni/login': typeof AlumniLoginRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
+  '/dashboard/attendance': typeof DashboardAttendanceRoute
+  '/dashboard/catalog': typeof DashboardCatalogRoute
   '/dashboard/certificates': typeof DashboardCertificatesRoute
+  '/dashboard/community': typeof DashboardCommunityRoute
   '/dashboard/courses': typeof DashboardCoursesRouteWithChildren
+  '/dashboard/events': typeof DashboardEventsRoute
+  '/dashboard/finance': typeof DashboardFinanceRoute
+  '/dashboard/grades': typeof DashboardGradesRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/quizzes': typeof DashboardQuizzesRoute
   '/instructor/analytics': typeof InstructorAnalyticsRoute
+  '/instructor/announcements': typeof InstructorAnnouncementsRoute
   '/instructor/assignments': typeof InstructorAssignmentsRoute
+  '/instructor/attendance': typeof InstructorAttendanceRoute
+  '/instructor/community': typeof InstructorCommunityRoute
+  '/instructor/messages': typeof InstructorMessagesRoute
   '/instructor/profile': typeof InstructorProfileRoute
+  '/instructor/schedule': typeof InstructorScheduleRoute
   '/instructor/students': typeof InstructorStudentsRoute
+  '/library/$resourceId': typeof LibraryResourceIdRoute
+  '/library/manage': typeof LibraryManageRoute
+  '/library/my-list': typeof LibraryMyListRoute
+  '/partner/finance': typeof PartnerFinanceRoute
+  '/partner/login': typeof PartnerLoginRoute
+  '/partner/management': typeof PartnerManagementRoute
+  '/partner/reports': typeof PartnerReportsRoute
+  '/partner/support': typeof PartnerSupportRoute
+  '/admin/': typeof AdminIndexRoute
+  '/alumni/': typeof AlumniIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/instructor/': typeof InstructorIndexRoute
+  '/library/': typeof LibraryIndexRoute
+  '/partner/': typeof PartnerIndexRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRoute
   '/instructor/courses/new': typeof InstructorCoursesNewRoute
   '/instructor/courses/': typeof InstructorCoursesIndexRoute
@@ -210,23 +575,64 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
+    | '/alumni'
     | '/dashboard'
     | '/forgot-password'
     | '/instructor'
+    | '/library'
     | '/login'
+    | '/partner'
     | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/admin/analytics'
+    | '/admin/applications'
+    | '/admin/certificates'
+    | '/admin/finance'
+    | '/admin/notifications'
+    | '/admin/programs'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/alumni/career'
+    | '/alumni/community'
+    | '/alumni/directory'
+    | '/alumni/education'
+    | '/alumni/login'
     | '/dashboard/assignments'
+    | '/dashboard/attendance'
+    | '/dashboard/catalog'
     | '/dashboard/certificates'
+    | '/dashboard/community'
     | '/dashboard/courses'
+    | '/dashboard/events'
+    | '/dashboard/finance'
+    | '/dashboard/grades'
     | '/dashboard/profile'
+    | '/dashboard/quizzes'
     | '/instructor/analytics'
+    | '/instructor/announcements'
     | '/instructor/assignments'
+    | '/instructor/attendance'
+    | '/instructor/community'
+    | '/instructor/messages'
     | '/instructor/profile'
+    | '/instructor/schedule'
     | '/instructor/students'
+    | '/library/$resourceId'
+    | '/library/manage'
+    | '/library/my-list'
+    | '/partner/finance'
+    | '/partner/login'
+    | '/partner/management'
+    | '/partner/reports'
+    | '/partner/support'
+    | '/admin/'
+    | '/alumni/'
     | '/dashboard/'
     | '/instructor/'
+    | '/library/'
+    | '/partner/'
     | '/dashboard/courses/$courseId'
     | '/instructor/courses/new'
     | '/instructor/courses/'
@@ -238,39 +644,117 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/admin/analytics'
+    | '/admin/applications'
+    | '/admin/certificates'
+    | '/admin/finance'
+    | '/admin/notifications'
+    | '/admin/programs'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/alumni/career'
+    | '/alumni/community'
+    | '/alumni/directory'
+    | '/alumni/education'
+    | '/alumni/login'
     | '/dashboard/assignments'
+    | '/dashboard/attendance'
+    | '/dashboard/catalog'
     | '/dashboard/certificates'
+    | '/dashboard/community'
     | '/dashboard/courses'
+    | '/dashboard/events'
+    | '/dashboard/finance'
+    | '/dashboard/grades'
     | '/dashboard/profile'
+    | '/dashboard/quizzes'
     | '/instructor/analytics'
+    | '/instructor/announcements'
     | '/instructor/assignments'
+    | '/instructor/attendance'
+    | '/instructor/community'
+    | '/instructor/messages'
     | '/instructor/profile'
+    | '/instructor/schedule'
     | '/instructor/students'
+    | '/library/$resourceId'
+    | '/library/manage'
+    | '/library/my-list'
+    | '/partner/finance'
+    | '/partner/login'
+    | '/partner/management'
+    | '/partner/reports'
+    | '/partner/support'
+    | '/admin'
+    | '/alumni'
     | '/dashboard'
     | '/instructor'
+    | '/library'
+    | '/partner'
     | '/dashboard/courses/$courseId'
     | '/instructor/courses/new'
     | '/instructor/courses'
   id:
     | '__root__'
     | '/'
+    | '/admin'
+    | '/alumni'
     | '/dashboard'
     | '/forgot-password'
     | '/instructor'
+    | '/library'
     | '/login'
+    | '/partner'
     | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/admin/analytics'
+    | '/admin/applications'
+    | '/admin/certificates'
+    | '/admin/finance'
+    | '/admin/notifications'
+    | '/admin/programs'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/alumni/career'
+    | '/alumni/community'
+    | '/alumni/directory'
+    | '/alumni/education'
+    | '/alumni/login'
     | '/dashboard/assignments'
+    | '/dashboard/attendance'
+    | '/dashboard/catalog'
     | '/dashboard/certificates'
+    | '/dashboard/community'
     | '/dashboard/courses'
+    | '/dashboard/events'
+    | '/dashboard/finance'
+    | '/dashboard/grades'
     | '/dashboard/profile'
+    | '/dashboard/quizzes'
     | '/instructor/analytics'
+    | '/instructor/announcements'
     | '/instructor/assignments'
+    | '/instructor/attendance'
+    | '/instructor/community'
+    | '/instructor/messages'
     | '/instructor/profile'
+    | '/instructor/schedule'
     | '/instructor/students'
+    | '/library/$resourceId'
+    | '/library/manage'
+    | '/library/my-list'
+    | '/partner/finance'
+    | '/partner/login'
+    | '/partner/management'
+    | '/partner/reports'
+    | '/partner/support'
+    | '/admin/'
+    | '/alumni/'
     | '/dashboard/'
     | '/instructor/'
+    | '/library/'
+    | '/partner/'
     | '/dashboard/courses/$courseId'
     | '/instructor/courses/new'
     | '/instructor/courses/'
@@ -278,10 +762,14 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  AlumniRoute: typeof AlumniRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   InstructorRoute: typeof InstructorRouteWithChildren
+  LibraryRoute: typeof LibraryRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PartnerRoute: typeof PartnerRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
@@ -310,11 +798,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/partner': {
+      id: '/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof PartnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/instructor': {
@@ -338,12 +840,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alumni': {
+      id: '/alumni'
+      path: '/alumni'
+      fullPath: '/alumni'
+      preLoaderRoute: typeof AlumniRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/partner/': {
+      id: '/partner/'
+      path: '/'
+      fullPath: '/partner/'
+      preLoaderRoute: typeof PartnerIndexRouteImport
+      parentRoute: typeof PartnerRoute
+    }
+    '/library/': {
+      id: '/library/'
+      path: '/'
+      fullPath: '/library/'
+      preLoaderRoute: typeof LibraryIndexRouteImport
+      parentRoute: typeof LibraryRoute
     }
     '/instructor/': {
       id: '/instructor/'
@@ -359,11 +889,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/alumni/': {
+      id: '/alumni/'
+      path: '/'
+      fullPath: '/alumni/'
+      preLoaderRoute: typeof AlumniIndexRouteImport
+      parentRoute: typeof AlumniRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/partner/support': {
+      id: '/partner/support'
+      path: '/support'
+      fullPath: '/partner/support'
+      preLoaderRoute: typeof PartnerSupportRouteImport
+      parentRoute: typeof PartnerRoute
+    }
+    '/partner/reports': {
+      id: '/partner/reports'
+      path: '/reports'
+      fullPath: '/partner/reports'
+      preLoaderRoute: typeof PartnerReportsRouteImport
+      parentRoute: typeof PartnerRoute
+    }
+    '/partner/management': {
+      id: '/partner/management'
+      path: '/management'
+      fullPath: '/partner/management'
+      preLoaderRoute: typeof PartnerManagementRouteImport
+      parentRoute: typeof PartnerRoute
+    }
+    '/partner/login': {
+      id: '/partner/login'
+      path: '/login'
+      fullPath: '/partner/login'
+      preLoaderRoute: typeof PartnerLoginRouteImport
+      parentRoute: typeof PartnerRoute
+    }
+    '/partner/finance': {
+      id: '/partner/finance'
+      path: '/finance'
+      fullPath: '/partner/finance'
+      preLoaderRoute: typeof PartnerFinanceRouteImport
+      parentRoute: typeof PartnerRoute
+    }
+    '/library/my-list': {
+      id: '/library/my-list'
+      path: '/my-list'
+      fullPath: '/library/my-list'
+      preLoaderRoute: typeof LibraryMyListRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/manage': {
+      id: '/library/manage'
+      path: '/manage'
+      fullPath: '/library/manage'
+      preLoaderRoute: typeof LibraryManageRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/$resourceId': {
+      id: '/library/$resourceId'
+      path: '/$resourceId'
+      fullPath: '/library/$resourceId'
+      preLoaderRoute: typeof LibraryResourceIdRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/instructor/students': {
       id: '/instructor/students'
       path: '/students'
       fullPath: '/instructor/students'
       preLoaderRoute: typeof InstructorStudentsRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/schedule': {
+      id: '/instructor/schedule'
+      path: '/schedule'
+      fullPath: '/instructor/schedule'
+      preLoaderRoute: typeof InstructorScheduleRouteImport
       parentRoute: typeof InstructorRoute
     }
     '/instructor/profile': {
@@ -373,11 +980,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstructorProfileRouteImport
       parentRoute: typeof InstructorRoute
     }
+    '/instructor/messages': {
+      id: '/instructor/messages'
+      path: '/messages'
+      fullPath: '/instructor/messages'
+      preLoaderRoute: typeof InstructorMessagesRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/community': {
+      id: '/instructor/community'
+      path: '/community'
+      fullPath: '/instructor/community'
+      preLoaderRoute: typeof InstructorCommunityRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/attendance': {
+      id: '/instructor/attendance'
+      path: '/attendance'
+      fullPath: '/instructor/attendance'
+      preLoaderRoute: typeof InstructorAttendanceRouteImport
+      parentRoute: typeof InstructorRoute
+    }
     '/instructor/assignments': {
       id: '/instructor/assignments'
       path: '/assignments'
       fullPath: '/instructor/assignments'
       preLoaderRoute: typeof InstructorAssignmentsRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/announcements': {
+      id: '/instructor/announcements'
+      path: '/announcements'
+      fullPath: '/instructor/announcements'
+      preLoaderRoute: typeof InstructorAnnouncementsRouteImport
       parentRoute: typeof InstructorRoute
     }
     '/instructor/analytics': {
@@ -387,11 +1022,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstructorAnalyticsRouteImport
       parentRoute: typeof InstructorRoute
     }
+    '/dashboard/quizzes': {
+      id: '/dashboard/quizzes'
+      path: '/quizzes'
+      fullPath: '/dashboard/quizzes'
+      preLoaderRoute: typeof DashboardQuizzesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/profile': {
       id: '/dashboard/profile'
       path: '/profile'
       fullPath: '/dashboard/profile'
       preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/grades': {
+      id: '/dashboard/grades'
+      path: '/grades'
+      fullPath: '/dashboard/grades'
+      preLoaderRoute: typeof DashboardGradesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/finance': {
+      id: '/dashboard/finance'
+      path: '/finance'
+      fullPath: '/dashboard/finance'
+      preLoaderRoute: typeof DashboardFinanceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/events': {
+      id: '/dashboard/events'
+      path: '/events'
+      fullPath: '/dashboard/events'
+      preLoaderRoute: typeof DashboardEventsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/courses': {
@@ -401,11 +1064,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCoursesRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/community': {
+      id: '/dashboard/community'
+      path: '/community'
+      fullPath: '/dashboard/community'
+      preLoaderRoute: typeof DashboardCommunityRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/certificates': {
       id: '/dashboard/certificates'
       path: '/certificates'
       fullPath: '/dashboard/certificates'
       preLoaderRoute: typeof DashboardCertificatesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/catalog': {
+      id: '/dashboard/catalog'
+      path: '/catalog'
+      fullPath: '/dashboard/catalog'
+      preLoaderRoute: typeof DashboardCatalogRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/attendance': {
+      id: '/dashboard/attendance'
+      path: '/attendance'
+      fullPath: '/dashboard/attendance'
+      preLoaderRoute: typeof DashboardAttendanceRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/assignments': {
@@ -414,6 +1098,97 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/assignments'
       preLoaderRoute: typeof DashboardAssignmentsRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/alumni/login': {
+      id: '/alumni/login'
+      path: '/login'
+      fullPath: '/alumni/login'
+      preLoaderRoute: typeof AlumniLoginRouteImport
+      parentRoute: typeof AlumniRoute
+    }
+    '/alumni/education': {
+      id: '/alumni/education'
+      path: '/education'
+      fullPath: '/alumni/education'
+      preLoaderRoute: typeof AlumniEducationRouteImport
+      parentRoute: typeof AlumniRoute
+    }
+    '/alumni/directory': {
+      id: '/alumni/directory'
+      path: '/directory'
+      fullPath: '/alumni/directory'
+      preLoaderRoute: typeof AlumniDirectoryRouteImport
+      parentRoute: typeof AlumniRoute
+    }
+    '/alumni/community': {
+      id: '/alumni/community'
+      path: '/community'
+      fullPath: '/alumni/community'
+      preLoaderRoute: typeof AlumniCommunityRouteImport
+      parentRoute: typeof AlumniRoute
+    }
+    '/alumni/career': {
+      id: '/alumni/career'
+      path: '/career'
+      fullPath: '/alumni/career'
+      preLoaderRoute: typeof AlumniCareerRouteImport
+      parentRoute: typeof AlumniRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/programs': {
+      id: '/admin/programs'
+      path: '/programs'
+      fullPath: '/admin/programs'
+      preLoaderRoute: typeof AdminProgramsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/certificates': {
+      id: '/admin/certificates'
+      path: '/certificates'
+      fullPath: '/admin/certificates'
+      preLoaderRoute: typeof AdminCertificatesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/applications': {
+      id: '/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AdminApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/instructor/courses/': {
       id: '/instructor/courses/'
@@ -439,6 +1214,53 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminApplicationsRoute: typeof AdminApplicationsRoute
+  AdminCertificatesRoute: typeof AdminCertificatesRoute
+  AdminFinanceRoute: typeof AdminFinanceRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminProgramsRoute: typeof AdminProgramsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminApplicationsRoute: AdminApplicationsRoute,
+  AdminCertificatesRoute: AdminCertificatesRoute,
+  AdminFinanceRoute: AdminFinanceRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminProgramsRoute: AdminProgramsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface AlumniRouteChildren {
+  AlumniCareerRoute: typeof AlumniCareerRoute
+  AlumniCommunityRoute: typeof AlumniCommunityRoute
+  AlumniDirectoryRoute: typeof AlumniDirectoryRoute
+  AlumniEducationRoute: typeof AlumniEducationRoute
+  AlumniLoginRoute: typeof AlumniLoginRoute
+  AlumniIndexRoute: typeof AlumniIndexRoute
+}
+
+const AlumniRouteChildren: AlumniRouteChildren = {
+  AlumniCareerRoute: AlumniCareerRoute,
+  AlumniCommunityRoute: AlumniCommunityRoute,
+  AlumniDirectoryRoute: AlumniDirectoryRoute,
+  AlumniEducationRoute: AlumniEducationRoute,
+  AlumniLoginRoute: AlumniLoginRoute,
+  AlumniIndexRoute: AlumniIndexRoute,
+}
+
+const AlumniRouteWithChildren =
+  AlumniRoute._addFileChildren(AlumniRouteChildren)
+
 interface DashboardCoursesRouteChildren {
   DashboardCoursesCourseIdRoute: typeof DashboardCoursesCourseIdRoute
 }
@@ -452,17 +1274,31 @@ const DashboardCoursesRouteWithChildren =
 
 interface DashboardRouteChildren {
   DashboardAssignmentsRoute: typeof DashboardAssignmentsRoute
+  DashboardAttendanceRoute: typeof DashboardAttendanceRoute
+  DashboardCatalogRoute: typeof DashboardCatalogRoute
   DashboardCertificatesRoute: typeof DashboardCertificatesRoute
+  DashboardCommunityRoute: typeof DashboardCommunityRoute
   DashboardCoursesRoute: typeof DashboardCoursesRouteWithChildren
+  DashboardEventsRoute: typeof DashboardEventsRoute
+  DashboardFinanceRoute: typeof DashboardFinanceRoute
+  DashboardGradesRoute: typeof DashboardGradesRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardQuizzesRoute: typeof DashboardQuizzesRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAssignmentsRoute: DashboardAssignmentsRoute,
+  DashboardAttendanceRoute: DashboardAttendanceRoute,
+  DashboardCatalogRoute: DashboardCatalogRoute,
   DashboardCertificatesRoute: DashboardCertificatesRoute,
+  DashboardCommunityRoute: DashboardCommunityRoute,
   DashboardCoursesRoute: DashboardCoursesRouteWithChildren,
+  DashboardEventsRoute: DashboardEventsRoute,
+  DashboardFinanceRoute: DashboardFinanceRoute,
+  DashboardGradesRoute: DashboardGradesRoute,
   DashboardProfileRoute: DashboardProfileRoute,
+  DashboardQuizzesRoute: DashboardQuizzesRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -472,8 +1308,13 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 interface InstructorRouteChildren {
   InstructorAnalyticsRoute: typeof InstructorAnalyticsRoute
+  InstructorAnnouncementsRoute: typeof InstructorAnnouncementsRoute
   InstructorAssignmentsRoute: typeof InstructorAssignmentsRoute
+  InstructorAttendanceRoute: typeof InstructorAttendanceRoute
+  InstructorCommunityRoute: typeof InstructorCommunityRoute
+  InstructorMessagesRoute: typeof InstructorMessagesRoute
   InstructorProfileRoute: typeof InstructorProfileRoute
+  InstructorScheduleRoute: typeof InstructorScheduleRoute
   InstructorStudentsRoute: typeof InstructorStudentsRoute
   InstructorIndexRoute: typeof InstructorIndexRoute
   InstructorCoursesNewRoute: typeof InstructorCoursesNewRoute
@@ -482,8 +1323,13 @@ interface InstructorRouteChildren {
 
 const InstructorRouteChildren: InstructorRouteChildren = {
   InstructorAnalyticsRoute: InstructorAnalyticsRoute,
+  InstructorAnnouncementsRoute: InstructorAnnouncementsRoute,
   InstructorAssignmentsRoute: InstructorAssignmentsRoute,
+  InstructorAttendanceRoute: InstructorAttendanceRoute,
+  InstructorCommunityRoute: InstructorCommunityRoute,
+  InstructorMessagesRoute: InstructorMessagesRoute,
   InstructorProfileRoute: InstructorProfileRoute,
+  InstructorScheduleRoute: InstructorScheduleRoute,
   InstructorStudentsRoute: InstructorStudentsRoute,
   InstructorIndexRoute: InstructorIndexRoute,
   InstructorCoursesNewRoute: InstructorCoursesNewRoute,
@@ -494,12 +1340,54 @@ const InstructorRouteWithChildren = InstructorRoute._addFileChildren(
   InstructorRouteChildren,
 )
 
+interface LibraryRouteChildren {
+  LibraryResourceIdRoute: typeof LibraryResourceIdRoute
+  LibraryManageRoute: typeof LibraryManageRoute
+  LibraryMyListRoute: typeof LibraryMyListRoute
+  LibraryIndexRoute: typeof LibraryIndexRoute
+}
+
+const LibraryRouteChildren: LibraryRouteChildren = {
+  LibraryResourceIdRoute: LibraryResourceIdRoute,
+  LibraryManageRoute: LibraryManageRoute,
+  LibraryMyListRoute: LibraryMyListRoute,
+  LibraryIndexRoute: LibraryIndexRoute,
+}
+
+const LibraryRouteWithChildren =
+  LibraryRoute._addFileChildren(LibraryRouteChildren)
+
+interface PartnerRouteChildren {
+  PartnerFinanceRoute: typeof PartnerFinanceRoute
+  PartnerLoginRoute: typeof PartnerLoginRoute
+  PartnerManagementRoute: typeof PartnerManagementRoute
+  PartnerReportsRoute: typeof PartnerReportsRoute
+  PartnerSupportRoute: typeof PartnerSupportRoute
+  PartnerIndexRoute: typeof PartnerIndexRoute
+}
+
+const PartnerRouteChildren: PartnerRouteChildren = {
+  PartnerFinanceRoute: PartnerFinanceRoute,
+  PartnerLoginRoute: PartnerLoginRoute,
+  PartnerManagementRoute: PartnerManagementRoute,
+  PartnerReportsRoute: PartnerReportsRoute,
+  PartnerSupportRoute: PartnerSupportRoute,
+  PartnerIndexRoute: PartnerIndexRoute,
+}
+
+const PartnerRouteWithChildren =
+  PartnerRoute._addFileChildren(PartnerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  AlumniRoute: AlumniRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   InstructorRoute: InstructorRouteWithChildren,
+  LibraryRoute: LibraryRouteWithChildren,
   LoginRoute: LoginRoute,
+  PartnerRoute: PartnerRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
@@ -507,3 +1395,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
