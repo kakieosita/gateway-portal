@@ -11,12 +11,13 @@ export function StatCard({
   value: string;
   delta?: string;
   icon: React.ElementType;
-  tone?: "primary" | "mint" | "success" | "destructive";
+  tone?: "primary" | "mint" | "success" | "warning" | "destructive";
 }) {
   const toneMap = {
     primary: "bg-gradient-primary text-primary-foreground",
     mint: "bg-mint text-mint-foreground",
     success: "bg-success text-success-foreground",
+    warning: "bg-warning text-warning-foreground",
     destructive: "bg-destructive text-destructive-foreground",
   };
   return (
