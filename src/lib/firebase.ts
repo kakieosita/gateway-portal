@@ -1,13 +1,20 @@
-import { getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
-const fallbackApiKey = "AIzaSyD3m0D3m0D3m0D3m0D3m0D3m0D3m0D3m0D";
-const configuredApiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+const configuredApiKey = import.meta.env.VITE_FIREBASE_API_KEY as string | undefined;
+
+// A valid Firebase web API key starts with "AIza" and is ~39 chars long.
+const isValidApiKey =
+  typeof configuredApiKey === "string" &&
+  configuredApiKey.startsWith("AIza") &&
+  configuredApiKey.length >= 30;
+
+export const isFirebaseConfigured = isValidApiKey;
 
 const firebaseConfig = {
-  apiKey: configuredApiKey && !configuredApiKey.includes(":") ? configuredApiKey : fallbackApiKey,
+  apiKey: isValidApiKey ? configuredApiKey! : "AIzaSyDemoDemoDemoDemoDemoDemoDemoDemoDemo",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "demo.firebaseapp.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
@@ -16,12 +23,69 @@ const firebaseConfig = {
 };
 
 const appName = "upskill-school-ui";
-const app = getApps().some((firebaseApp) => firebaseApp.name === appName)
-  ? getApp(appName)
-  : initializeApp(firebaseConfig, appName);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+function getOrCreateApp(): FirebaseApp {
+  const existing = getApps().find((a) => a.name === appName);
+  if (existing) return existing;
+  return initializeApp(firebaseConfig, appName);
+}
 
-export default app;
+let _app: FirebaseApp | null = null;
+let _auth: Auth | null = null;
+let _db: Firestore | null = null;
+let _storage: FirebaseStorage | null = null;
+
+export function getFirebaseApp(): FirebaseApp {
+  if (!_app) _app = getOrCreateApp();
+  return _app;
+}
+
+export function getFirebaseAuth(): Auth {
+  if (!_auth) {
+    try {
+      _auth = getAuth(getFirebaseApp());
+    } catch (err) {
+      console.warn("[firebase] getAuth failed — Firebase not configured.", err);
+      throw err;
+    }
+  }
+  return _auth;
+}
+
+export function getDb(): Firestore {
+  if (!_db) _db = getFirestore(getFirebaseApp());
+  return _db;
+}
+
+export function getFirebaseStorage(): FirebaseStorage {
+  if (!_storage) _storage = getStorage(getFirebaseApp());
+  return _storage;
+}
+
+// Backwards-compatible exports using lazy proxies so importing this module
+// never throws even when Firebase env vars are missing or invalid.
+export const auth = new Proxy({} as Auth, {
+  get(_t, prop) {
+    const target = getFirebaseAuth() as unknown as Record<string | symbol, unknown>;
+    const value = target[prop];
+    return typeof value === "function" ? (value as Function).bind(target) : value;
+  },
+});
+
+export const db = new Proxy({} as Firestore, {
+  get(_t, prop) {
+    const target = getDb() as unknown as Record<string | symbol, unknown>;
+    const value = target[prop];
+    return typeof value === "function" ? (value as Function).bind(target) : value;
+  },
+});
+
+export const storage = new Proxy({} as FirebaseStorage, {
+  get(_t, prop) {
+    const target = getFirebaseStorage() as unknown as Record<string | symbol, unknown>;
+    const value = target[prop];
+    return typeof value === "function" ? (value as Function).bind(target) : value;
+  },
+});
+
+export default { getFirebaseApp, getFirebaseAuth, getDb, getFirebaseStorage };
