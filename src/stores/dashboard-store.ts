@@ -45,6 +45,7 @@ type DashboardState = {
   submitAssignment: (id: string) => void;
   updateUser: (patch: Partial<User>) => void;
   payInvoice: (id: string) => void;
+  enrollCourse: (id: string) => void;
 };
 
 export const useDashboardStore = create<DashboardState>((set) => ({
@@ -86,7 +87,7 @@ export const useDashboardStore = create<DashboardState>((set) => ({
         i.id === id ? { ...i, status: "paid" as const } : i,
       ),
     })),
-  enrollCourse: (id) => {
+  enrollCourse: (_id) => {
     // Mock implementation: normally we'd add the course from a global catalog
     // For now, we'll just show a success message or handle it in the component.
     // To make it simple, we don't mutate the courses list here because mockCourses
