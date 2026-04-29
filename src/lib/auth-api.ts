@@ -14,14 +14,19 @@ export interface SignupInput {
   role: Role;
 }
 
-async function fetchUserRole(userId: string): Promise<Role> {
-  const { data } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .limit(1)
-    .maybeSingle();
-  return (data?.role as Role) ?? "student";
+async function fetchUserRole(userId: string, fallback: Role = "student"): Promise<Role> {
+  // Retry briefly to handle transient PGRST002/503 schema cache errors
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+    if (!error) return (data?.role as Role) ?? fallback;
+    await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+  }
+  return fallback;
 }
 
 export const authApi = {
@@ -33,7 +38,8 @@ export const authApi = {
     if (error) throw new Error(error.message);
     if (!data.user) throw new Error("Login failed");
 
-    const role = await fetchUserRole(data.user.id);
+    const metaRole = (data.user.user_metadata?.role as Role | undefined) ?? "student";
+    const role = await fetchUserRole(data.user.id, metaRole);
     return {
       token: data.session?.access_token ?? "",
       user: { email: data.user.email, role },
