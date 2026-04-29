@@ -38,7 +38,8 @@ export const authApi = {
     if (error) throw new Error(error.message);
     if (!data.user) throw new Error("Login failed");
 
-    const role = await fetchUserRole(data.user.id);
+    const metaRole = (data.user.user_metadata?.role as Role | undefined) ?? "student";
+    const role = await fetchUserRole(data.user.id, metaRole);
     return {
       token: data.session?.access_token ?? "",
       user: { email: data.user.email, role },
