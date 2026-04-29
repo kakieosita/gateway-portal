@@ -81,6 +81,21 @@ export const authApi = {
     return { verified: true };
   },
 
+  async resendVerification(email: string) {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    });
+    if (error) throw new Error(error.message);
+    return { message: `Verification link resent to ${email}` };
+  },
+
+  async checkVerified() {
+    const { data } = await supabase.auth.getUser();
+    return Boolean(data.user?.email_confirmed_at);
+  },
+
   async google() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
