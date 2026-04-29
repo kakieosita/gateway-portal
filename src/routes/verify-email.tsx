@@ -108,9 +108,7 @@ function VerifyEmailPage() {
             type="button"
             className="flex w-full items-center justify-center rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-muted"
             onClick={() => {
-              // Standard Firebase doesn't have a direct "resend" without the user object
-              // But we can tell them to try signing up again or contact support
-              alert("Check your spam folder. If you still don't see it, try signing in to trigger a new link.");
+              alert("Check your spam folder. If you still don't see it, try signing up again or contact support.");
             }}
           >
             Didn't receive email?
