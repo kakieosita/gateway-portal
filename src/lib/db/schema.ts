@@ -1,4 +1,5 @@
-import { Timestamp } from "firebase/firestore";
+// Schema types — Timestamp replaced with ISO date strings (Supabase).
+type Timestamp = string;
 
 // User Roles
 export type UserRole = "admin" | "alumni" | "partner" | "student" | "instructor";
