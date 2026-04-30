@@ -15,8 +15,14 @@ function tanstackStartFetchableDevFallback() {
       middlewares: { use: (handler: (req: any, res: any, next: (error?: unknown) => void) => void | Promise<void>) => void };
       ssrFixStacktrace: (error: Error) => void;
     }) {
-      return () => {
-        viteDevServer.middlewares.use(async (req, res, next) => {
+      viteDevServer.middlewares.use(async (req, res, next) => {
+        const accept = req.headers?.accept ?? "";
+        const url = req.originalUrl ?? req.url ?? "";
+
+        if (!accept.includes("text/html") || url.startsWith("/@") || url.includes(".")) {
+          return next();
+        }
+
           const serverEnv = viteDevServer.environments.ssr as unknown as {
             dispatchFetch?: (request: Request) => Promise<Response>;
           };
@@ -38,7 +44,6 @@ function tanstackStartFetchableDevFallback() {
             return next(error);
           }
         });
-      };
     },
   };
 }
