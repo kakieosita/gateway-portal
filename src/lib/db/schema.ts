@@ -10,14 +10,48 @@ export interface User {
   displayName: string | null;
   photoURL: string | null;
   role: UserRole;
+  status?: "Active" | "Suspended" | "Inactive";
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  programsAssigned?: string[];
+  contractUrl?: string;
   // Specific role data can be added as nested objects or separate collections,
   // but for simplicity we keep basic info here.
   bio?: string;
   phoneNumber?: string;
+  demographics?: {
+    age?: number;
+    gender?: string;
+    location?: string;
+  };
 }
 
+export interface Enrollment {
+  id: string;
+  studentId: string;
+  programId: string;
+  status: "active" | "completed" | "dropped";
+  createdAt: Timestamp;
+}
+
+export interface Transaction {
+  id: string;
+  userId: string;
+  amount: number;
+  status: "completed" | "pending" | "failed";
+  createdAt: Timestamp;
+  programId?: string;
+  type?: "payment" | "refund";
+}
+
+export interface Activity {
+  id: string;
+  type: "registration" | "payment" | "partner_request" | "enrollment" | "other";
+  description: string;
+  createdAt: Timestamp;
+  userId?: string;
+  metadata?: Record<string, any>;
+}
 
 
 export interface PageSection {

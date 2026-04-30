@@ -88,8 +88,8 @@ export const authApi = {
       displayName: input.fullName,
       photoURL: null,
       role: input.role,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     useAuthStore.getState().setUser(userData);

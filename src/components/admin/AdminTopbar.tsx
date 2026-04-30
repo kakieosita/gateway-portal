@@ -11,10 +11,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authApi } from "@/lib/auth-api";
+import { useAuthStore } from "@/stores/auth-store";
 import { useNavigate } from "@tanstack/react-router";
 
 export function AdminTopbar() {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const displayName = user?.displayName || "Admin User";
 
   const handleLogout = async () => {
     try {
@@ -66,7 +69,7 @@ export function AdminTopbar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Admin User</DropdownMenuLabel>
+            <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>

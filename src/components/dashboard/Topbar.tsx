@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Bell, Menu, Search, ChevronDown, User, Settings, LogOut } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useDashboardStore } from "@/stores/dashboard-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { cn } from "@/lib/utils";
 import { authApi } from "@/lib/auth-api";
 
 export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   const navigate = useNavigate();
-  const user = useDashboardStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
@@ -20,7 +21,8 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
     }
   };
 
-  const initials = user.name
+  const displayName = user?.displayName || "Student User";
+  const initials = displayName
     .split(" ")
     .map((n) => n[0])
     .slice(0, 2)
@@ -94,16 +96,16 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
               {initials}
             </div>
             <div className="hidden text-left sm:block">
-              <p className="text-xs font-semibold leading-tight">{user.name.split(" ")[0]}</p>
-              <p className="text-[10px] leading-tight text-muted-foreground">{user.role}</p>
+              <p className="text-xs font-semibold leading-tight">{displayName.split(" ")[0]}</p>
+              <p className="text-[10px] leading-tight text-muted-foreground capitalize">{user?.role || "student"}</p>
             </div>
             <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition", profileOpen && "rotate-180")} />
           </button>
           {profileOpen && (
             <div className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-2xl border border-border bg-popover shadow-card">
               <div className="border-b border-border p-3">
-                <p className="text-sm font-semibold">{user.name}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+                <p className="text-sm font-semibold">{displayName}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
               <ul className="p-1 text-sm">
                 <li>
