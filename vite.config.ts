@@ -5,24 +5,5 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { createRunnableDevEnvironment } from "vite";
 
-const createSsrDevEnvironment = (name: string, config: unknown) =>
-  createRunnableDevEnvironment(name, config as never);
-
-export default defineConfig({
-  tanstackStart: {
-    vite: {
-      installDevServerMiddleware: true,
-    },
-  },
-  vite: {
-    environments: {
-      ssr: {
-        dev: {
-          createEnvironment: createSsrDevEnvironment,
-        },
-      },
-    },
-  },
-} as never);
+export default defineConfig();
