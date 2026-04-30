@@ -5,49 +5,5 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { NodeRequest, sendNodeResponse } from "srvx/node";
 
-function tanstackStartFetchableDevFallback() {
-  return {
-    name: "tanstack-start-fetchable-dev-fallback",
-    configureServer(viteDevServer: {
-      environments: Record<string, { dispatchFetch?: (request: Request) => Promise<Response> }>;
-      middlewares: { use: (handler: (req: any, res: any, next: (error?: unknown) => void) => void | Promise<void>) => void };
-      ssrFixStacktrace: (error: Error) => void;
-    }) {
-      viteDevServer.middlewares.use(async (req, res, next) => {
-        const accept = req.headers?.accept ?? "";
-        const url = req.originalUrl ?? req.url ?? "";
-
-        if (!accept.includes("text/html") || url.startsWith("/@") || url.includes(".")) {
-          return next();
-        }
-
-          const serverEnv = viteDevServer.environments.ssr as unknown as {
-            dispatchFetch?: (request: Request) => Promise<Response>;
-          };
-
-          if (!serverEnv?.dispatchFetch) {
-            return next();
-          }
-
-          if (req.originalUrl) {
-            req.url = req.originalUrl;
-          }
-
-          try {
-            const webReq = new NodeRequest({ req, res });
-            const webRes = await serverEnv.dispatchFetch(webReq);
-            return sendNodeResponse(res, webRes);
-          } catch (error) {
-            viteDevServer.ssrFixStacktrace(error as Error);
-            return next(error);
-          }
-        });
-    },
-  };
-}
-
-export default defineConfig({
-  plugins: [tanstackStartFetchableDevFallback()],
-} as never);
+export default defineConfig();
