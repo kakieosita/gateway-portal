@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   BookOpen,
@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import upskillLogo from "@/assets/upskill-logo.png";
 import { cn } from "@/lib/utils";
-import { authApi } from "@/lib/auth-api";
 
 type NavItem = {
   to: string;
@@ -42,17 +41,7 @@ const items: NavItem[] = [
 
 export function InstructorSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { location } = useRouterState();
-  const navigate = useNavigate();
   const path = location.pathname;
-
-  const handleLogout = async () => {
-    try {
-      await authApi.logout();
-      navigate({ to: "/login" });
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
 
   return (
     <>
@@ -115,13 +104,13 @@ export function InstructorSidebar({ open, onClose }: { open: boolean; onClose: (
         </nav>
 
         <div className="border-t border-border p-4">
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+          <Link
+            to="/login"
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-5 w-5" />
             Sign out
-          </button>
+          </Link>
         </div>
       </aside>
     </>

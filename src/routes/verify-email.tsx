@@ -5,7 +5,6 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { InlineAlert } from "@/components/auth/Alert";
 import { authApi } from "@/lib/auth-api";
-import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/verify-email")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -23,7 +22,6 @@ export const Route = createFileRoute("/verify-email")({
 function VerifyEmailPage() {
   const { email } = Route.useSearch();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,9 +57,7 @@ function VerifyEmailPage() {
     try {
       await authApi.verifyEmail(digits.join(""));
       setSuccess(true);
-      
-      const target = user ? authApi.getDashboardRoute(user.role) : "/";
-      setTimeout(() => navigate({ to: target }), 1200);
+      setTimeout(() => navigate({ to: "/" }), 1200);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");
     } finally {
@@ -110,22 +106,14 @@ function VerifyEmailPage() {
           
           <button 
             type="button"
-            className="flex w-full items-center justify-center rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-muted disabled:opacity-50"
-            disabled={loading}
-            onClick={async () => {
-              setError(null);
-              setLoading(true);
-              try {
-                await authApi.resendVerificationEmail();
-                alert("A new verification link has been sent to your inbox.");
-              } catch (err) {
-                setError(err instanceof Error ? err.message : "Failed to resend email");
-              } finally {
-                setLoading(false);
-              }
+            className="flex w-full items-center justify-center rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-muted"
+            onClick={() => {
+              // Standard Firebase doesn't have a direct "resend" without the user object
+              // But we can tell them to try signing up again or contact support
+              alert("Check your spam folder. If you still don't see it, try signing in to trigger a new link.");
             }}
           >
-            {loading ? "Sending..." : "Didn't receive email? Resend link"}
+            Didn't receive email?
           </button>
         </div>
       </div>

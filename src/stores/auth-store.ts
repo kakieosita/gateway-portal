@@ -21,7 +21,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: true,
   initialized: false,
 
-  setUser: (user) => set({ user, loading: false }),
+  setUser: (user) => set({ user }),
   setLoading: (loading) => set({ loading }),
 
   initialize: () => {
@@ -29,41 +29,24 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (useAuthStore.getState().initialized) return;
 
     onAuthStateChanged(auth, async (firebaseUser) => {
+      set({ firebaseUser, initialized: true });
+
       if (firebaseUser) {
         try {
           const userDoc = await getDoc(doc(usersCollection, firebaseUser.uid));
           if (userDoc.exists()) {
-            set({ 
-              user: userDoc.data() as User, 
-              firebaseUser, 
-              initialized: true, 
-              loading: false 
-            });
+            set({ user: userDoc.data() as User, loading: false });
           } else {
             // Handle case where auth user exists but Firestore doc doesn't yet
-            set({ 
-              user: null, 
-              firebaseUser, 
-              initialized: true, 
-              loading: false 
-            });
+            // This could happen during signup before the doc is created
+            set({ user: null, loading: false });
           }
         } catch (error) {
           console.error("Error fetching user profile:", error);
-          set({ 
-            user: null, 
-            firebaseUser, 
-            initialized: true, 
-            loading: false 
-            });
+          set({ user: null, loading: false });
         }
       } else {
-        set({ 
-          user: null, 
-          firebaseUser: null, 
-          initialized: true, 
-          loading: false 
-        });
+        set({ user: null, loading: false });
       }
     });
   },

@@ -9,14 +9,14 @@ export const Route = createFileRoute("/partner")({
   beforeLoad: async ({ location }) => {
     const { user, initialized } = useAuthStore.getState();
     
-    // Don't guard the login or signup pages
-    if (location.pathname === "/partner/login" || location.pathname === "/partner/signup") return;
+    // Don't guard the login page itself
+    if (location.pathname === "/partner/login") return;
 
     if (initialized && !user) {
       throw redirect({
         to: "/partner/login",
         search: {
-          redirect: location.pathname,
+          redirect: location.href,
         },
       });
     }
@@ -30,11 +30,11 @@ export const Route = createFileRoute("/partner")({
 
 function PartnerLayout() {
   const matchRoute = useMatchRoute();
+  const isLoginPage = matchRoute({ to: "/partner/login" });
   const { user, loading } = useAuthStore();
-  // Auth pages render standalone — no sidebar
-  const isAuthPage = matchRoute({ to: "/partner/login" }) || matchRoute({ to: "/partner/signup" });
-  
-  if (isAuthPage) {
+
+  // Login page renders standalone — no sidebar
+  if (isLoginPage) {
     return <Outlet />;
   }
 

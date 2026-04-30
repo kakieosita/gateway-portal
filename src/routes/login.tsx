@@ -12,19 +12,8 @@ import { SocialButton } from "@/components/auth/SocialButton";
 import { Divider } from "@/components/auth/Divider";
 import { InlineAlert } from "@/components/auth/Alert";
 import { authApi } from "@/lib/auth-api";
-import { useAuthStore } from "@/stores/auth-store";
-import { redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: z.object({
-    redirect: z.string().optional(),
-  }),
-  beforeLoad: async () => {
-    const { user, initialized } = useAuthStore.getState();
-    if (initialized && user) {
-      throw redirect({ to: authApi.getDashboardRoute(user.role) });
-    }
-  },
   head: () => ({
     meta: [
       { title: "Sign in — LumenEd" },
@@ -43,7 +32,6 @@ type FormData = z.infer<typeof schema>;
 
 function LoginPage() {
   const navigate = useNavigate();
-  const search = Route.useSearch();
   const [serverError, setServerError] = useState<string | null>(null);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
 
@@ -59,15 +47,11 @@ function LoginPage() {
     try {
       const { user } = await authApi.login({ email: data.email, password: data.password });
       
-      if (search.redirect) {
-        // Simple validation to ensure it's a relative path or same origin
-        const redirectUrl = search.redirect.startsWith("/") 
-          ? search.redirect 
-          : authApi.getDashboardRoute(user.role);
-        navigate({ to: redirectUrl });
-      } else {
-        navigate({ to: authApi.getDashboardRoute(user.role) });
-      }
+      if (user.role === "admin") navigate({ to: "/admin" });
+      else if (user.role === "instructor") navigate({ to: "/instructor" });
+      else if (user.role === "alumni") navigate({ to: "/alumni" });
+      else if (user.role === "partner") navigate({ to: "/partner" });
+      else navigate({ to: "/dashboard" });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Something went wrong");
     }
@@ -79,14 +63,11 @@ function LoginPage() {
     try {
       const { user } = await authApi.google();
       
-      if (search.redirect) {
-        const redirectUrl = search.redirect.startsWith("/") 
-          ? search.redirect 
-          : authApi.getDashboardRoute(user.role);
-        navigate({ to: redirectUrl });
-      } else {
-        navigate({ to: authApi.getDashboardRoute(user.role) });
-      }
+      if (user.role === "admin") navigate({ to: "/admin" });
+      else if (user.role === "instructor") navigate({ to: "/instructor" });
+      else if (user.role === "alumni") navigate({ to: "/alumni" });
+      else if (user.role === "partner") navigate({ to: "/partner" });
+      else navigate({ to: "/dashboard" });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Google sign in failed");
     } finally {
