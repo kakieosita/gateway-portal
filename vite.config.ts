@@ -7,10 +7,8 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { createRunnableDevEnvironment } from "vite";
 
-const createSsrDevEnvironment = ((name, config, context) =>
-  createRunnableDevEnvironment(name, config, context)) as NonNullable<
-  NonNullable<NonNullable<import("vite").UserConfig["environments"]>["ssr"]>["dev"]
->["createEnvironment"];
+const createSsrDevEnvironment = (name: string, config: unknown) =>
+  createRunnableDevEnvironment(name, config as never);
 
 export default defineConfig({
   tanstackStart: {
@@ -27,4 +25,4 @@ export default defineConfig({
       },
     },
   },
-});
+} as never);
