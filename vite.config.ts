@@ -6,12 +6,15 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { NodeRequest, sendNodeResponse } from "srvx/node";
-import type { PluginOption, ViteDevServer } from "vite";
 
-function tanstackStartFetchableDevFallback(): PluginOption {
+function tanstackStartFetchableDevFallback() {
   return {
     name: "tanstack-start-fetchable-dev-fallback",
-    configureServer(viteDevServer: ViteDevServer) {
+    configureServer(viteDevServer: {
+      environments: Record<string, { dispatchFetch?: (request: Request) => Promise<Response> }>;
+      middlewares: { use: (handler: (req: any, res: any, next: (error?: unknown) => void) => void | Promise<void>) => void };
+      ssrFixStacktrace: (error: Error) => void;
+    }) {
       return () => {
         viteDevServer.middlewares.use(async (req, res, next) => {
           const serverEnv = viteDevServer.environments.ssr as unknown as {
@@ -42,4 +45,4 @@ function tanstackStartFetchableDevFallback(): PluginOption {
 
 export default defineConfig({
   plugins: [tanstackStartFetchableDevFallback()],
-});
+} as never);
