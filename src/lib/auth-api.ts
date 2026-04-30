@@ -14,8 +14,6 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc, Timestamp } from "firebase/firestore";
 import { auth, db } from "./firebase";
-import { useAuthStore } from "@/stores/auth-store";
-import { UserRole, User as DbUser } from "./db/schema";
 import { usersCollection } from "./db/collections";
 
 const TOKEN_KEY = "edu_auth_token";
@@ -50,12 +48,9 @@ export const authApi = {
 
     // Fetch the user's role from Firestore
     const userDoc = await getDoc(doc(usersCollection, userCredential.user.uid));
-    const userData = userDoc.data() as DbUser;
-    
-    // Update store immediately to avoid race conditions with onAuthStateChanged
-    useAuthStore.getState().setUser(userData);
+    const role = userDoc.exists() ? userDoc.data().role : "student";
 
-    return { token, user: userData };
+    return { token, user: { email: userCredential.user.email, role } };
   },
 
   async signup(input: SignupInput) {
@@ -82,19 +77,7 @@ export const authApi = {
     const token = await userCredential.user.getIdToken();
     sessionStorage.setItem(TOKEN_KEY, token);
 
-    const userData: DbUser = {
-      id: userCredential.user.uid,
-      email: input.email,
-      displayName: input.fullName,
-      photoURL: null,
-      role: input.role,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    };
-
-    useAuthStore.getState().setUser(userData);
-
-    return { token, user: userData };
+    return { token, user: { email: input.email, role: input.role } };
   },
 
   async forgotPassword(email: string) {
@@ -144,46 +127,17 @@ export const authApi = {
     const token = await userCredential.user.getIdToken();
     sessionStorage.setItem(TOKEN_KEY, token);
 
-    const finalUserDoc = await getDoc(userDocRef);
-    const userData = finalUserDoc.data() as DbUser;
-    
-    useAuthStore.getState().setUser(userData);
-
-    return { token, user: userData };
+    return { token, user: { email: userCredential.user.email, role } };
   },
 
   async logout() {
     await signOut(auth);
     sessionStorage.removeItem(TOKEN_KEY);
-    useAuthStore.getState().setUser(null);
-  },
-
-  async resendVerificationEmail() {
-    if (auth.currentUser) {
-      await sendEmailVerification(auth.currentUser);
-      return { message: "Verification email resent" };
-    }
-    throw new Error("No user is currently signed in. Please sign in again to verify your email.");
   },
 
   getToken() {
     // Note: In a robust app, we'd rely on Firebase's auth state listener (onAuthStateChanged).
     // For synchronous router checks, we rely on the sessionStorage marker.
     return sessionStorage.getItem(TOKEN_KEY);
-  },
-
-  getDashboardRoute(role: Role): string {
-    switch (role) {
-      case "admin":
-        return "/admin";
-      case "instructor":
-        return "/instructor";
-      case "alumni":
-        return "/alumni";
-      case "partner":
-        return "/partner";
-      default:
-        return "/dashboard";
-    }
   },
 };

@@ -10,20 +10,9 @@ import { PasswordField } from "@/components/auth/PasswordField";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { InlineAlert } from "@/components/auth/Alert";
 import { authApi } from "@/lib/auth-api";
-import { useAuthStore } from "@/stores/auth-store";
-import { redirect } from "@tanstack/react-router";
 import upskillLogo from "@/assets/upskill-logo.png";
 
 export const Route = createFileRoute("/partner/login")({
-  validateSearch: z.object({
-    redirect: z.string().optional(),
-  }),
-  beforeLoad: async () => {
-    const { user, initialized } = useAuthStore.getState();
-    if (initialized && user) {
-      throw redirect({ to: authApi.getDashboardRoute(user.role) });
-    }
-  },
   head: () => ({
     meta: [
       { title: "Partner Sign In — UST Portal" },
@@ -46,7 +35,6 @@ type FormData = z.infer<typeof schema>;
 
 function PartnerLoginPage() {
   const navigate = useNavigate();
-  const search = Route.useSearch();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -59,16 +47,8 @@ function PartnerLoginPage() {
   const onSubmit = async (data: FormData) => {
     setServerError(null);
     try {
-      const { user } = await authApi.login({ email: data.email, password: data.password });
-      
-      if (search.redirect) {
-        const redirectUrl = search.redirect.startsWith("/") 
-          ? search.redirect 
-          : authApi.getDashboardRoute(user.role);
-        navigate({ to: redirectUrl });
-      } else {
-        navigate({ to: authApi.getDashboardRoute(user.role) });
-      }
+      await authApi.login({ email: data.email, password: data.password });
+      navigate({ to: "/partner" });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Something went wrong");
     }
@@ -249,10 +229,7 @@ function PartnerLoginPage() {
             <div className="mt-6 rounded-xl border border-border bg-muted/40 px-4 py-3">
               <p className="text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">Don't have an account?</span>{" "}
-                <Link to="/partner/signup" className="font-medium text-primary hover:underline">
-                  Sign up here
-                </Link>{" "}
-                or contact your UST Relationship Manager at{" "}
+                Contact your UST Relationship Manager or email{" "}
                 <a
                   href="mailto:partners@upskillsot.com"
                   className="font-medium text-primary hover:underline"

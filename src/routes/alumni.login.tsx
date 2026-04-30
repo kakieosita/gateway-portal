@@ -10,20 +10,9 @@ import { PasswordField } from "@/components/auth/PasswordField";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { InlineAlert } from "@/components/auth/Alert";
 import { authApi } from "@/lib/auth-api";
-import { useAuthStore } from "@/stores/auth-store";
-import { redirect } from "@tanstack/react-router";
 import upskillLogo from "@/assets/upskill-logo.png";
 
 export const Route = createFileRoute("/alumni/login")({
-  validateSearch: z.object({
-    redirect: z.string().optional(),
-  }),
-  beforeLoad: async () => {
-    const { user, initialized } = useAuthStore.getState();
-    if (initialized && user) {
-      throw redirect({ to: authApi.getDashboardRoute(user.role) });
-    }
-  },
   head: () => ({
     meta: [
       { title: "Alumni Sign In — UST Portal" },
@@ -46,7 +35,6 @@ type FormData = z.infer<typeof schema>;
 
 function AlumniLoginPage() {
   const navigate = useNavigate();
-  const search = Route.useSearch();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -59,16 +47,8 @@ function AlumniLoginPage() {
   const onSubmit = async (data: FormData) => {
     setServerError(null);
     try {
-      const { user } = await authApi.login({ email: data.email, password: data.password });
-      
-      if (search.redirect) {
-        const redirectUrl = search.redirect.startsWith("/") 
-          ? search.redirect 
-          : authApi.getDashboardRoute(user.role);
-        navigate({ to: redirectUrl });
-      } else {
-        navigate({ to: authApi.getDashboardRoute(user.role) });
-      }
+      await authApi.login({ email: data.email, password: data.password });
+      navigate({ to: "/alumni" });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Something went wrong");
     }
@@ -215,15 +195,8 @@ function AlumniLoginPage() {
             </form>
 
             {/* Footer */}
-            <div className="mt-6 space-y-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                Don't have an alumni account?{" "}
-                <Link to="/alumni/signup" className="font-semibold text-primary hover:underline">
-                  Sign up here
-                </Link>
-              </p>
-              <div className="h-px bg-border/50 w-full" />
-              <p className="text-sm text-muted-foreground">
+            <div className="mt-6 space-y-4">
+              <p className="text-center text-sm text-muted-foreground">
                 Not an alumnus?{" "}
                 <Link to="/login" className="font-semibold text-primary hover:underline">
                   Student / Staff login
