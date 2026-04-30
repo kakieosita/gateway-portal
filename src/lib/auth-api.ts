@@ -1,4 +1,24 @@
-import { supabase } from "@/integrations/supabase/client";
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
+  checkActionCode,
+  applyActionCode,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+  sendEmailVerification
+} from "firebase/auth";
+import { doc, setDoc, getDoc, Timestamp } from "firebase/firestore";
+import { auth, db } from "./firebase";
+import { useAuthStore } from "@/stores/auth-store";
+import { UserRole, User as DbUser } from "./db/schema";
+import { usersCollection } from "./db/collections";
+
+const TOKEN_KEY = "edu_auth_token";
 
 export type Role = "student" | "instructor" | "alumni" | "partner" | "admin";
 
@@ -14,109 +34,156 @@ export interface SignupInput {
   role: Role;
 }
 
-async function fetchUserRole(userId: string, fallback: Role = "student"): Promise<Role> {
-  // Retry briefly to handle transient PGRST002/503 schema cache errors
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .limit(1)
-      .maybeSingle();
-    if (!error) return (data?.role as Role) ?? fallback;
-    await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
-  }
-  return fallback;
-}
-
 export const authApi = {
   async login(input: LoginInput) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: input.email,
-      password: input.password,
-    });
-    if (error) throw new Error(error.message);
-    if (!data.user) throw new Error("Login failed");
+    const userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
+    
+    // Check if email is verified
+    if (!userCredential.user.emailVerified) {
+      // Optional: resend verification email if they try to login without verification
+      await sendEmailVerification(userCredential.user);
+      throw new Error("Please verify your email address. A new verification link has been sent to your inbox.");
+    }
 
-    const metaRole = (data.user.user_metadata?.role as Role | undefined) ?? "student";
-    const role = await fetchUserRole(data.user.id, metaRole);
-    return {
-      token: data.session?.access_token ?? "",
-      user: { email: data.user.email, role },
-    };
+    const token = await userCredential.user.getIdToken();
+    sessionStorage.setItem(TOKEN_KEY, token);
+
+    // Fetch the user's role from Firestore
+    const userDoc = await getDoc(doc(usersCollection, userCredential.user.uid));
+    const userData = userDoc.data() as DbUser;
+    
+    // Update store immediately to avoid race conditions with onAuthStateChanged
+    useAuthStore.getState().setUser(userData);
+
+    return { token, user: userData };
   },
 
   async signup(input: SignupInput) {
-    const redirectUrl = `${window.location.origin}/`;
-    const { data, error } = await supabase.auth.signUp({
-      email: input.email,
-      password: input.password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          display_name: input.fullName,
-          full_name: input.fullName,
-          role: input.role,
-        },
-      },
-    });
-    if (error) throw new Error(error.message);
+    // 1. Create the user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, input.email, input.password);
+    
+    // 2. Update their display name in Auth
+    await updateProfile(userCredential.user, { displayName: input.fullName });
 
-    return {
-      token: data.session?.access_token ?? "",
-      user: { email: input.email, role: input.role },
+    // 3. Create the user document in Firestore
+    await setDoc(doc(usersCollection, userCredential.user.uid), {
+      id: userCredential.user.uid,
+      email: input.email,
+      displayName: input.fullName,
+      photoURL: null,
+      role: input.role,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+    
+    // 4. Send verification email
+    await sendEmailVerification(userCredential.user);
+
+    const token = await userCredential.user.getIdToken();
+    sessionStorage.setItem(TOKEN_KEY, token);
+
+    const userData: DbUser = {
+      id: userCredential.user.uid,
+      email: input.email,
+      displayName: input.fullName,
+      photoURL: null,
+      role: input.role,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
     };
+
+    useAuthStore.getState().setUser(userData);
+
+    return { token, user: userData };
   },
 
   async forgotPassword(email: string) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    if (error) throw new Error(error.message);
+    await sendPasswordResetEmail(auth, email);
     return { message: `Reset link sent to ${email}` };
   },
 
-  async resetPassword(_actionCode: string, password: string) {
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) throw new Error(error.message);
+  async resetPassword(actionCode: string, password: string) {
+    // Verify the code before confirming
+    await verifyPasswordResetCode(auth, actionCode);
+    await confirmPasswordReset(auth, actionCode, password);
     return { message: "Password updated" };
   },
 
-  async verifyEmail(_actionCode: string) {
-    // Supabase verifies email via the link itself; nothing to do here.
+  async verifyEmail(actionCode: string) {
+    // Verify the email action code
+    await checkActionCode(auth, actionCode);
+    await applyActionCode(auth, actionCode);
     return { verified: true };
   },
 
-  async resendVerification(email: string) {
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/` },
-    });
-    if (error) throw new Error(error.message);
-    return { message: `Verification link resent to ${email}` };
-  },
-
-  async checkVerified() {
-    const { data } = await supabase.auth.getUser();
-    return Boolean(data.user?.email_confirmed_at);
-  },
-
   async google() {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/` },
-    });
-    if (error) throw new Error(error.message);
-    // OAuth redirects away; this return is rarely reached.
-    return { token: "", user: { email: null, role: "student" as Role }, redirect: data.url };
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    
+    // Check if user already exists in Firestore
+    const userDocRef = doc(usersCollection, userCredential.user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    let role: Role = "student";
+
+    // If it's a new Google user, create their document in Firestore
+    if (!userDocSnap.exists()) {
+      await setDoc(userDocRef, {
+        id: userCredential.user.uid,
+        email: userCredential.user.email || "",
+        displayName: userCredential.user.displayName || "Google User",
+        photoURL: userCredential.user.photoURL || null,
+        role: "student", // default role for social login
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+    } else {
+      role = userDocSnap.data().role as Role;
+    }
+
+    const token = await userCredential.user.getIdToken();
+    sessionStorage.setItem(TOKEN_KEY, token);
+
+    const finalUserDoc = await getDoc(userDocRef);
+    const userData = finalUserDoc.data() as DbUser;
+    
+    useAuthStore.getState().setUser(userData);
+
+    return { token, user: userData };
   },
 
   async logout() {
-    await supabase.auth.signOut();
+    await signOut(auth);
+    sessionStorage.removeItem(TOKEN_KEY);
+    useAuthStore.getState().setUser(null);
+  },
+
+  async resendVerificationEmail() {
+    if (auth.currentUser) {
+      await sendEmailVerification(auth.currentUser);
+      return { message: "Verification email resent" };
+    }
+    throw new Error("No user is currently signed in. Please sign in again to verify your email.");
   },
 
   getToken() {
-    return null;
+    // Note: In a robust app, we'd rely on Firebase's auth state listener (onAuthStateChanged).
+    // For synchronous router checks, we rely on the sessionStorage marker.
+    return sessionStorage.getItem(TOKEN_KEY);
+  },
+
+  getDashboardRoute(role: Role): string {
+    switch (role) {
+      case "admin":
+        return "/admin";
+      case "instructor":
+        return "/instructor";
+      case "alumni":
+        return "/alumni";
+      case "partner":
+        return "/partner";
+      default:
+        return "/dashboard";
+    }
   },
 };

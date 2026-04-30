@@ -17,7 +17,7 @@ export const Route = createFileRoute("/dashboard")({
       throw redirect({
         to: "/login",
         search: {
-          redirect: location.href,
+          redirect: location.pathname,
         },
       });
     }

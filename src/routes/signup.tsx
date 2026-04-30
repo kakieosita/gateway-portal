@@ -13,8 +13,16 @@ import { Divider } from "@/components/auth/Divider";
 import { InlineAlert } from "@/components/auth/Alert";
 import { authApi } from "@/lib/auth-api";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
+import { redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/signup")({
+  beforeLoad: async () => {
+    const { user, initialized } = useAuthStore.getState();
+    if (initialized && user) {
+      throw redirect({ to: authApi.getDashboardRoute(user.role) });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Create your account — LumenEd" },
@@ -77,12 +85,7 @@ function SignupPage() {
     setLoadingGoogle(true);
     try {
       const { user } = await authApi.google();
-      
-      if (user.role === "admin") navigate({ to: "/admin" });
-      else if (user.role === "instructor") navigate({ to: "/instructor" });
-      else if (user.role === "alumni") navigate({ to: "/alumni" });
-      else if (user.role === "partner") navigate({ to: "/partner" });
-      else navigate({ to: "/dashboard" });
+      navigate({ to: authApi.getDashboardRoute(user.role) });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Google sign up failed");
     } finally {

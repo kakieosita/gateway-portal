@@ -10,8 +10,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { authApi } from "@/lib/auth-api";
+import { useNavigate } from "@tanstack/react-router";
 
 export function AdminTopbar() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <SidebarTrigger />
@@ -58,7 +71,7 @@ export function AdminTopbar() {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -9,7 +9,8 @@ import {
   LogOut,
   Settings,
   FileText,
-  Users
+  Users,
+  ChevronLeft
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,6 +25,8 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { authApi } from "@/lib/auth-api";
+import { useNavigate } from "@tanstack/react-router";
 
 const partnerMenu = [
   {
@@ -55,6 +58,16 @@ const partnerMenu = [
 
 export function PartnerSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -102,9 +115,17 @@ export function PartnerSidebar() {
              </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} tooltip="Sign out">
+              <LogOut className="size-4" />
+              <span className="truncate group-data-[collapsible=icon]:hidden">
+                Sign out
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Exit Portal">
               <Link to="/">
-                <LogOut className="size-4" />
+                <ChevronLeft className="size-4" />
                 <span className="truncate group-data-[collapsible=icon]:hidden">
                   Back to Website
                 </span>

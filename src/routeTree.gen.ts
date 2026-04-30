@@ -28,6 +28,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as AlumniIndexRouteImport } from './routes/alumni.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PartnerSupportRouteImport } from './routes/partner.support'
+import { Route as PartnerSignupRouteImport } from './routes/partner.signup'
 import { Route as PartnerReportsRouteImport } from './routes/partner.reports'
 import { Route as PartnerManagementRouteImport } from './routes/partner.management'
 import { Route as PartnerLoginRouteImport } from './routes/partner.login'
@@ -55,6 +56,7 @@ import { Route as DashboardCertificatesRouteImport } from './routes/dashboard.ce
 import { Route as DashboardCatalogRouteImport } from './routes/dashboard.catalog'
 import { Route as DashboardAttendanceRouteImport } from './routes/dashboard.attendance'
 import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.assignments'
+import { Route as AlumniSignupRouteImport } from './routes/alumni.signup'
 import { Route as AlumniLoginRouteImport } from './routes/alumni.login'
 import { Route as AlumniEducationRouteImport } from './routes/alumni.education'
 import { Route as AlumniDirectoryRouteImport } from './routes/alumni.directory'
@@ -165,6 +167,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const PartnerSupportRoute = PartnerSupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => PartnerRoute,
+} as any)
+const PartnerSignupRoute = PartnerSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => PartnerRoute,
 } as any)
 const PartnerReportsRoute = PartnerReportsRouteImport.update({
@@ -302,6 +309,11 @@ const DashboardAssignmentsRoute = DashboardAssignmentsRouteImport.update({
   path: '/assignments',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AlumniSignupRoute = AlumniSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => AlumniRoute,
+} as any)
 const AlumniLoginRoute = AlumniLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -410,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/alumni/directory': typeof AlumniDirectoryRoute
   '/alumni/education': typeof AlumniEducationRoute
   '/alumni/login': typeof AlumniLoginRoute
+  '/alumni/signup': typeof AlumniSignupRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/attendance': typeof DashboardAttendanceRoute
   '/dashboard/catalog': typeof DashboardCatalogRoute
@@ -437,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/partner/login': typeof PartnerLoginRoute
   '/partner/management': typeof PartnerManagementRoute
   '/partner/reports': typeof PartnerReportsRoute
+  '/partner/signup': typeof PartnerSignupRoute
   '/partner/support': typeof PartnerSupportRoute
   '/admin/': typeof AdminIndexRoute
   '/alumni/': typeof AlumniIndexRoute
@@ -468,6 +482,7 @@ export interface FileRoutesByTo {
   '/alumni/directory': typeof AlumniDirectoryRoute
   '/alumni/education': typeof AlumniEducationRoute
   '/alumni/login': typeof AlumniLoginRoute
+  '/alumni/signup': typeof AlumniSignupRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/attendance': typeof DashboardAttendanceRoute
   '/dashboard/catalog': typeof DashboardCatalogRoute
@@ -495,6 +510,7 @@ export interface FileRoutesByTo {
   '/partner/login': typeof PartnerLoginRoute
   '/partner/management': typeof PartnerManagementRoute
   '/partner/reports': typeof PartnerReportsRoute
+  '/partner/signup': typeof PartnerSignupRoute
   '/partner/support': typeof PartnerSupportRoute
   '/admin': typeof AdminIndexRoute
   '/alumni': typeof AlumniIndexRoute
@@ -533,6 +549,7 @@ export interface FileRoutesById {
   '/alumni/directory': typeof AlumniDirectoryRoute
   '/alumni/education': typeof AlumniEducationRoute
   '/alumni/login': typeof AlumniLoginRoute
+  '/alumni/signup': typeof AlumniSignupRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/attendance': typeof DashboardAttendanceRoute
   '/dashboard/catalog': typeof DashboardCatalogRoute
@@ -560,6 +577,7 @@ export interface FileRoutesById {
   '/partner/login': typeof PartnerLoginRoute
   '/partner/management': typeof PartnerManagementRoute
   '/partner/reports': typeof PartnerReportsRoute
+  '/partner/signup': typeof PartnerSignupRoute
   '/partner/support': typeof PartnerSupportRoute
   '/admin/': typeof AdminIndexRoute
   '/alumni/': typeof AlumniIndexRoute
@@ -599,6 +617,7 @@ export interface FileRouteTypes {
     | '/alumni/directory'
     | '/alumni/education'
     | '/alumni/login'
+    | '/alumni/signup'
     | '/dashboard/assignments'
     | '/dashboard/attendance'
     | '/dashboard/catalog'
@@ -626,6 +645,7 @@ export interface FileRouteTypes {
     | '/partner/login'
     | '/partner/management'
     | '/partner/reports'
+    | '/partner/signup'
     | '/partner/support'
     | '/admin/'
     | '/alumni/'
@@ -657,6 +677,7 @@ export interface FileRouteTypes {
     | '/alumni/directory'
     | '/alumni/education'
     | '/alumni/login'
+    | '/alumni/signup'
     | '/dashboard/assignments'
     | '/dashboard/attendance'
     | '/dashboard/catalog'
@@ -684,6 +705,7 @@ export interface FileRouteTypes {
     | '/partner/login'
     | '/partner/management'
     | '/partner/reports'
+    | '/partner/signup'
     | '/partner/support'
     | '/admin'
     | '/alumni'
@@ -721,6 +743,7 @@ export interface FileRouteTypes {
     | '/alumni/directory'
     | '/alumni/education'
     | '/alumni/login'
+    | '/alumni/signup'
     | '/dashboard/assignments'
     | '/dashboard/attendance'
     | '/dashboard/catalog'
@@ -748,6 +771,7 @@ export interface FileRouteTypes {
     | '/partner/login'
     | '/partner/management'
     | '/partner/reports'
+    | '/partner/signup'
     | '/partner/support'
     | '/admin/'
     | '/alumni/'
@@ -908,6 +932,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/partner/support'
       preLoaderRoute: typeof PartnerSupportRouteImport
+      parentRoute: typeof PartnerRoute
+    }
+    '/partner/signup': {
+      id: '/partner/signup'
+      path: '/signup'
+      fullPath: '/partner/signup'
+      preLoaderRoute: typeof PartnerSignupRouteImport
       parentRoute: typeof PartnerRoute
     }
     '/partner/reports': {
@@ -1099,6 +1130,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAssignmentsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/alumni/signup': {
+      id: '/alumni/signup'
+      path: '/signup'
+      fullPath: '/alumni/signup'
+      preLoaderRoute: typeof AlumniSignupRouteImport
+      parentRoute: typeof AlumniRoute
+    }
     '/alumni/login': {
       id: '/alumni/login'
       path: '/login'
@@ -1246,6 +1284,7 @@ interface AlumniRouteChildren {
   AlumniDirectoryRoute: typeof AlumniDirectoryRoute
   AlumniEducationRoute: typeof AlumniEducationRoute
   AlumniLoginRoute: typeof AlumniLoginRoute
+  AlumniSignupRoute: typeof AlumniSignupRoute
   AlumniIndexRoute: typeof AlumniIndexRoute
 }
 
@@ -1255,6 +1294,7 @@ const AlumniRouteChildren: AlumniRouteChildren = {
   AlumniDirectoryRoute: AlumniDirectoryRoute,
   AlumniEducationRoute: AlumniEducationRoute,
   AlumniLoginRoute: AlumniLoginRoute,
+  AlumniSignupRoute: AlumniSignupRoute,
   AlumniIndexRoute: AlumniIndexRoute,
 }
 
@@ -1362,6 +1402,7 @@ interface PartnerRouteChildren {
   PartnerLoginRoute: typeof PartnerLoginRoute
   PartnerManagementRoute: typeof PartnerManagementRoute
   PartnerReportsRoute: typeof PartnerReportsRoute
+  PartnerSignupRoute: typeof PartnerSignupRoute
   PartnerSupportRoute: typeof PartnerSupportRoute
   PartnerIndexRoute: typeof PartnerIndexRoute
 }
@@ -1371,6 +1412,7 @@ const PartnerRouteChildren: PartnerRouteChildren = {
   PartnerLoginRoute: PartnerLoginRoute,
   PartnerManagementRoute: PartnerManagementRoute,
   PartnerReportsRoute: PartnerReportsRoute,
+  PartnerSignupRoute: PartnerSignupRoute,
   PartnerSupportRoute: PartnerSupportRoute,
   PartnerIndexRoute: PartnerIndexRoute,
 }

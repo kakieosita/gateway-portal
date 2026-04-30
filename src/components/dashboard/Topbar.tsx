@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { Bell, Menu, Search, ChevronDown, User, Settings, LogOut } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useDashboardStore } from "@/stores/dashboard-store";
 import { cn } from "@/lib/utils";
+import { authApi } from "@/lib/auth-api";
 
 export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
+  const navigate = useNavigate();
   const user = useDashboardStore((s) => s.user);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   const initials = user.name
     .split(" ")
@@ -111,12 +122,12 @@ export function DashboardTopbar({ onMenuClick }: { onMenuClick: () => void }) {
                 </li>
                 <li className="my-1 border-t border-border" />
                 <li>
-                  <Link
-                    to="/login"
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-destructive hover:bg-destructive/10"
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-destructive hover:bg-destructive/10"
                   >
                     <LogOut className="h-4 w-4" /> Sign out
-                  </Link>
+                  </button>
                 </li>
               </ul>
             </div>

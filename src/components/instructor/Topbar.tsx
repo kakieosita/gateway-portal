@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { Bell, Menu, ChevronDown, User, Settings, LogOut } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useInstructorStore } from "@/stores/instructor-store";
 import { cn } from "@/lib/utils";
+import { authApi } from "@/lib/auth-api";
 
 export function InstructorTopbar({ onMenuClick }: { onMenuClick: () => void }) {
+  const navigate = useNavigate();
   const profile = useInstructorStore((s) => s.profile);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   const initials = profile.name
     .split(" ")
@@ -104,12 +115,12 @@ export function InstructorTopbar({ onMenuClick }: { onMenuClick: () => void }) {
                 </li>
                 <li className="my-1 border-t border-border" />
                 <li>
-                  <Link
-                    to="/login"
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-destructive hover:bg-destructive/10"
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-destructive hover:bg-destructive/10"
                   >
                     <LogOut className="h-4 w-4" /> Sign out
-                  </Link>
+                  </button>
                 </li>
               </ul>
             </div>

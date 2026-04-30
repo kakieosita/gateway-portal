@@ -1,74 +1,70 @@
 import { create } from "zustand";
-import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-
-export type UserRole = "admin" | "alumni" | "partner" | "student" | "instructor";
-
-export interface AppUser {
-  id: string;
-  email: string;
-  displayName: string | null;
-  photoURL: string | null;
-  role: UserRole;
-}
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+import { UserRole, User } from "@/lib/db/schema";
+import { usersCollection } from "@/lib/db/collections";
 
 interface AuthState {
-  user: AppUser | null;
-  session: Session | null;
-  supabaseUser: SupabaseUser | null;
+  user: User | null;
+  firebaseUser: FirebaseUser | null;
   loading: boolean;
   initialized: boolean;
-  setUser: (user: AppUser | null) => void;
+  setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   initialize: () => void;
 }
 
-async function loadProfile(userId: string, email: string): Promise<AppUser | null> {
-  const [{ data: profile }, { data: roleRow }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-    supabase.from("user_roles").select("role").eq("user_id", userId).limit(1).maybeSingle(),
-  ]);
-
-  return {
-    id: userId,
-    email: profile?.email ?? email,
-    displayName: profile?.display_name ?? null,
-    photoURL: profile?.photo_url ?? null,
-    role: (roleRow?.role as UserRole) ?? "student",
-  };
-}
-
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  session: null,
-  supabaseUser: null,
+  firebaseUser: null,
   loading: true,
   initialized: false,
 
-  setUser: (user) => set({ user }),
+  setUser: (user) => set({ user, loading: false }),
   setLoading: (loading) => set({ loading }),
 
   initialize: () => {
-    if (get().initialized) return;
-    set({ initialized: true });
+    // Prevent multiple initializations
+    if (useAuthStore.getState().initialized) return;
 
-    // Listener first, then session check
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({ session, supabaseUser: session?.user ?? null });
-      if (session?.user) {
-        // Defer Supabase calls to avoid deadlock in callback
-        setTimeout(async () => {
-          const appUser = await loadProfile(session.user.id, session.user.email ?? "");
-          set({ user: appUser, loading: false });
-        }, 0);
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userDoc = await getDoc(doc(usersCollection, firebaseUser.uid));
+          if (userDoc.exists()) {
+            set({ 
+              user: userDoc.data() as User, 
+              firebaseUser, 
+              initialized: true, 
+              loading: false 
+            });
+          } else {
+            // Handle case where auth user exists but Firestore doc doesn't yet
+            set({ 
+              user: null, 
+              firebaseUser, 
+              initialized: true, 
+              loading: false 
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+          set({ 
+            user: null, 
+            firebaseUser, 
+            initialized: true, 
+            loading: false 
+            });
+        }
       } else {
-        set({ user: null, loading: false });
+        set({ 
+          user: null, 
+          firebaseUser: null, 
+          initialized: true, 
+          loading: false 
+        });
       }
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      set({ session, supabaseUser: session?.user ?? null });
-      if (!session) set({ loading: false });
     });
   },
 }));
