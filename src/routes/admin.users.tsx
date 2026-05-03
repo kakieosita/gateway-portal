@@ -32,6 +32,22 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { User, UserRole } from "@/lib/db/schema";
 import { toast } from "sonner";
 
+const hasFirebaseCredentials =
+  typeof import.meta.env.VITE_FIREBASE_API_KEY === "string" &&
+  import.meta.env.VITE_FIREBASE_API_KEY.startsWith("AIza") &&
+  !import.meta.env.VITE_FIREBASE_API_KEY.includes("Demo") &&
+  Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
+
+function isFirebaseConfigError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    !hasFirebaseCredentials ||
+    message.includes("api-key") ||
+    message.includes("auth/invalid-api-key") ||
+    message.includes("auth/configuration-not-found")
+  );
+}
+
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsers,
 });
@@ -77,6 +93,27 @@ function AdminUsers() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      if (!hasFirebaseCredentials) {
+        // Demo mode: simulate user creation locally
+        const mockUser: User = {
+          id: `demo-${Date.now()}`,
+          email: formData.email,
+          displayName: formData.name,
+          photoURL: null,
+          role: formData.role,
+          status: "Active",
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        };
+        setUsers((prev) => [mockUser, ...prev]);
+        toast.success(`${formData.name} added (demo mode — backend not configured)`);
+        setIsAddModalOpen(false);
+        setFormData({ name: "", email: "", password: "", role: activeTab });
+        setContractFile(null);
+        setIsSubmitting(false);
+        return;
+      }
+
       // 1. Create in Firebase Auth (Secondary app to avoid logout)
       const userCredential = await createUserWithEmailAndPassword(secondaryAuth, formData.email, formData.password);
       const uid = userCredential.user.uid;
