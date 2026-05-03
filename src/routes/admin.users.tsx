@@ -32,6 +32,22 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { User, UserRole } from "@/lib/db/schema";
 import { toast } from "sonner";
 
+const hasFirebaseCredentials =
+  typeof import.meta.env.VITE_FIREBASE_API_KEY === "string" &&
+  import.meta.env.VITE_FIREBASE_API_KEY.startsWith("AIza") &&
+  !import.meta.env.VITE_FIREBASE_API_KEY.includes("Demo") &&
+  Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
+
+function isFirebaseConfigError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    !hasFirebaseCredentials ||
+    message.includes("api-key") ||
+    message.includes("auth/invalid-api-key") ||
+    message.includes("auth/configuration-not-found")
+  );
+}
+
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsers,
 });
