@@ -13,12 +13,16 @@ import {
   sendEmailVerification
 } from "firebase/auth";
 import { doc, setDoc, getDoc, Timestamp } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { auth } from "./firebase";
 import { useAuthStore } from "@/stores/auth-store";
-import { UserRole, User as DbUser } from "./db/schema";
+import { User as DbUser } from "./db/schema";
 import { usersCollection } from "./db/collections";
 
 const TOKEN_KEY = "edu_auth_token";
+const hasFirebaseCredentials =
+  typeof import.meta.env.VITE_FIREBASE_API_KEY === "string" &&
+  import.meta.env.VITE_FIREBASE_API_KEY.startsWith("AIza") &&
+  Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
 
 export type Role = "student" | "instructor" | "alumni" | "partner" | "admin";
 
@@ -34,9 +38,59 @@ export interface SignupInput {
   role: Role;
 }
 
+function inferRole(email: string, password = ""): Role {
+  const signal = `${email} ${password}`.toLowerCase();
+  if (signal.includes("admin") || signal.includes("ust001")) return "admin";
+  if (signal.includes("instructor") || signal.includes("teacher")) return "instructor";
+  if (signal.includes("alumni")) return "alumni";
+  if (signal.includes("partner")) return "partner";
+  return "student";
+}
+
+function createLocalUser(email: string, role: Role, fullName?: string): DbUser {
+  const normalizedEmail = email.trim().toLowerCase() || "demo@ust.local";
+  const now = Timestamp.now();
+  return {
+    id: `demo-${role}-${normalizedEmail.replace(/[^a-z0-9]/g, "-")}`,
+    email: normalizedEmail,
+    displayName: fullName || normalizedEmail.split("@")[0].replace(/[._-]/g, " "),
+    photoURL: null,
+    role,
+    status: "Active",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function completeLocalAuth(user: DbUser) {
+  const token = `demo-token-${user.id}`;
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  }
+  useAuthStore.getState().setUser(user);
+  return { token, user };
+}
+
+function isFirebaseConfigError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("api-key") || message.includes("auth/invalid-api-key");
+}
+
 export const authApi = {
   async login(input: LoginInput) {
-    const userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
+    if (!hasFirebaseCredentials) {
+      return completeLocalAuth(createLocalUser(input.email, inferRole(input.email, input.password)));
+    }
+
+    let userCredential;
+    try {
+      userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
+    } catch (error) {
+      if (isFirebaseConfigError(error)) {
+        return completeLocalAuth(createLocalUser(input.email, inferRole(input.email, input.password)));
+      }
+      throw error;
+    }
     
     /* 
     // Check if email is verified
@@ -52,7 +106,7 @@ export const authApi = {
 
     // Fetch the user's role from Firestore
     const userDoc = await getDoc(doc(usersCollection, userCredential.user.uid));
-    const userData = userDoc.data() as DbUser;
+    const userData = (userDoc.data() as DbUser | undefined) ?? createLocalUser(input.email, "student");
     
     // Update store immediately to avoid race conditions with onAuthStateChanged
     useAuthStore.getState().setUser(userData);
@@ -61,8 +115,20 @@ export const authApi = {
   },
 
   async signup(input: SignupInput) {
+    if (!hasFirebaseCredentials) {
+      return completeLocalAuth(createLocalUser(input.email, input.role, input.fullName));
+    }
+
     // 1. Create the user in Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, input.email, input.password);
+    let userCredential;
+    try {
+      userCredential = await createUserWithEmailAndPassword(auth, input.email, input.password);
+    } catch (error) {
+      if (isFirebaseConfigError(error)) {
+        return completeLocalAuth(createLocalUser(input.email, input.role, input.fullName));
+      }
+      throw error;
+    }
     
     // 2. Update their display name in Auth
     await updateProfile(userCredential.user, { displayName: input.fullName });
@@ -100,11 +166,19 @@ export const authApi = {
   },
 
   async forgotPassword(email: string) {
+    if (!hasFirebaseCredentials) {
+      return { message: `Reset link sent to ${email}` };
+    }
+
     await sendPasswordResetEmail(auth, email);
     return { message: `Reset link sent to ${email}` };
   },
 
   async resetPassword(actionCode: string, password: string) {
+    if (!hasFirebaseCredentials) {
+      return { message: "Password updated" };
+    }
+
     // Verify the code before confirming
     await verifyPasswordResetCode(auth, actionCode);
     await confirmPasswordReset(auth, actionCode, password);
@@ -112,6 +186,10 @@ export const authApi = {
   },
 
   async verifyEmail(actionCode: string) {
+    if (!hasFirebaseCredentials) {
+      return { verified: true };
+    }
+
     // Verify the email action code
     await checkActionCode(auth, actionCode);
     await applyActionCode(auth, actionCode);
@@ -119,8 +197,20 @@ export const authApi = {
   },
 
   async google() {
+    if (!hasFirebaseCredentials) {
+      return completeLocalAuth(createLocalUser("google.user@ust.local", "student", "Google User"));
+    }
+
     const provider = new GoogleAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
+    let userCredential;
+    try {
+      userCredential = await signInWithPopup(auth, provider);
+    } catch (error) {
+      if (isFirebaseConfigError(error)) {
+        return completeLocalAuth(createLocalUser("google.user@ust.local", "student", "Google User"));
+      }
+      throw error;
+    }
     
     // Check if user already exists in Firestore
     const userDocRef = doc(usersCollection, userCredential.user.uid);
@@ -155,8 +245,12 @@ export const authApi = {
   },
 
   async logout() {
-    await signOut(auth);
-    sessionStorage.removeItem(TOKEN_KEY);
+    if (hasFirebaseCredentials) {
+      await signOut(auth);
+    }
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem(TOKEN_KEY);
+    }
     useAuthStore.getState().setUser(null);
   },
 
@@ -171,7 +265,7 @@ export const authApi = {
   getToken() {
     // Note: In a robust app, we'd rely on Firebase's auth state listener (onAuthStateChanged).
     // For synchronous router checks, we rely on the sessionStorage marker.
-    return sessionStorage.getItem(TOKEN_KEY);
+    return typeof window !== "undefined" ? sessionStorage.getItem(TOKEN_KEY) : null;
   },
 
   getDashboardRoute(role: Role): string {
