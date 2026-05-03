@@ -1,32 +1,35 @@
-import { initializeApp } from "firebase/app";
+import { getApp, getApps, initializeApp, type FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+const configuredApiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+const hasUsableApiKey =
+  typeof configuredApiKey === "string" &&
+  configuredApiKey.startsWith("AIza") &&
+  configuredApiKey.length >= 30;
+
+const firebaseConfig: FirebaseOptions = {
+  apiKey: hasUsableApiKey ? configuredApiKey : "AIzaSyDemoDemoDemoDemoDemoDemoDemoDemoDemo",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "demo.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "000000000000",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:000000000000:web:0000000000000000000000",
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const appName = "upskill-school-ui";
+const app = getApps().some((firebaseApp) => firebaseApp.name === appName)
+  ? getApp(appName)
+  : initializeApp(firebaseConfig, appName);
 
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// Secondary app for admin account creation without logging out the current user
-// Check if it exists to avoid "duplicate app" errors during Vite HMR
-import { getApps, getApp } from "firebase/app";
-
-export const secondaryApp = getApps().find(app => app.name === "Secondary") 
-  ? getApp("Secondary") 
+export const secondaryApp = getApps().some((firebaseApp) => firebaseApp.name === "Secondary")
+  ? getApp("Secondary")
   : initializeApp(firebaseConfig, "Secondary");
   
 export const secondaryAuth = getAuth(secondaryApp);
