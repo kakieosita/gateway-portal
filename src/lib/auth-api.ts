@@ -38,12 +38,14 @@ export const authApi = {
   async login(input: LoginInput) {
     const userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
     
+    /* 
     // Check if email is verified
     if (!userCredential.user.emailVerified) {
       // Optional: resend verification email if they try to login without verification
       await sendEmailVerification(userCredential.user);
       throw new Error("Please verify your email address. A new verification link has been sent to your inbox.");
     }
+    */
 
     const token = await userCredential.user.getIdToken();
     sessionStorage.setItem(TOKEN_KEY, token);
@@ -88,8 +90,8 @@ export const authApi = {
       displayName: input.fullName,
       photoURL: null,
       role: input.role,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
     };
 
     useAuthStore.getState().setUser(userData);

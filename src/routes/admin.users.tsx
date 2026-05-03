@@ -84,15 +84,7 @@ function AdminUsers() {
       // 2. Update Profile
       await updateProfile(userCredential.user, { displayName: formData.name });
 
-      // 3. Handle Instructor Contract Upload
-      let contractUrl = "";
-      if (formData.role === "instructor" && contractFile) {
-        const storageRef = ref(storage, `contracts/${uid}/${contractFile.name}`);
-        await uploadBytes(storageRef, contractFile);
-        contractUrl = await getDownloadURL(storageRef);
-      }
-
-      // 4. Save to Firestore
+      // 3. Save to Firestore first to ensure user exists even if upload fails
       const newUser: User = {
         id: uid,
         email: formData.email,
@@ -100,12 +92,34 @@ function AdminUsers() {
         photoURL: null,
         role: formData.role,
         status: "Active",
-        createdAt: Timestamp.now() as any,
-        updatedAt: Timestamp.now() as any,
-        ...(contractUrl ? { contractUrl } : {})
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
       };
       
       await setDoc(doc(usersCollection, uid), newUser);
+
+      // 4. Handle Instructor Contract Upload (if applicable)
+      if (formData.role === "instructor" && contractFile) {
+        try {
+          const storageRef = ref(storage, `contracts/${uid}/${contractFile.name}`);
+          await uploadBytes(storageRef, contractFile);
+          const contractUrl = await getDownloadURL(storageRef);
+          
+          // Update the document with the contract URL
+          await updateDoc(doc(usersCollection, uid), { contractUrl });
+        } catch (uploadError: any) {
+          console.error("Contract upload failed:", uploadError);
+          toast.warning(`User ${formData.name} created, but contract upload failed.`);
+          
+          // Cleanup modal state anyway
+          setIsAddModalOpen(false);
+          setFormData({ name: "", email: "", password: "", role: activeTab });
+          setContractFile(null);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
 
       toast.success(`${formData.name} added successfully!`);
       setIsAddModalOpen(false);
@@ -177,8 +191,8 @@ function AdminUsers() {
               photoURL: null,
               role,
               status: "Active",
-              createdAt: Timestamp.now() as any,
-              updatedAt: Timestamp.now() as any,
+              createdAt: Timestamp.now(),
+              updatedAt: Timestamp.now(),
             };
 
             await setDoc(doc(usersCollection, uid), newUser);

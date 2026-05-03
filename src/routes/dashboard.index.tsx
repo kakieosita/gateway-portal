@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { BookOpen, CheckCircle2, Clock, Award, TrendingUp, FileText, Calendar, Activity as ActivityIcon, Bell, GraduationCap, MapPin } from "lucide-react";
 import { useDashboardStore } from "@/stores/dashboard-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { CourseCard } from "@/components/dashboard/CourseCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,8 @@ export const Route = createFileRoute("/dashboard/")({
 });
 
 function DashboardOverview() {
-  const { courses, assignments, activity, certificates, user, announcements, grades } = useDashboardStore();
+  const { courses, assignments, activity, certificates, announcements, grades } = useDashboardStore();
+  const { user: authUser } = useAuthStore();
 
   const inProgress = courses.filter((c) => c.progress > 0 && c.progress < 100);
   const completed = courses.filter((c) => c.progress === 100);
@@ -47,7 +49,7 @@ function DashboardOverview() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1">
             <p className="text-sm font-medium opacity-80">Welcome back,</p>
-            <h1 className="mt-1 font-display text-3xl font-bold">{user.name.split(" ")[0]} 👋</h1>
+            <h1 className="mt-1 font-display text-3xl font-bold">{(authUser?.displayName || "Student").split(" ")[0]} 👋</h1>
             <p className="mt-2 max-w-xl text-sm opacity-90">
               You have {upcoming.length} upcoming {upcoming.length === 1 ? "assignment" : "assignments"} and{" "}
               {inProgress.length} courses in progress. Keep up the momentum!
