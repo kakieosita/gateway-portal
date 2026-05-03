@@ -71,13 +71,26 @@ function completeLocalAuth(user: DbUser) {
   return { token, user };
 }
 
+function isFirebaseConfigError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("api-key") || message.includes("auth/invalid-api-key");
+}
+
 export const authApi = {
   async login(input: LoginInput) {
     if (!hasFirebaseCredentials) {
       return completeLocalAuth(createLocalUser(input.email, inferRole(input.email, input.password)));
     }
 
-    const userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
+    let userCredential;
+    try {
+      userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
+    } catch (error) {
+      if (isFirebaseConfigError(error)) {
+        return completeLocalAuth(createLocalUser(input.email, inferRole(input.email, input.password)));
+      }
+      throw error;
+    }
     
     /* 
     // Check if email is verified
@@ -107,7 +120,15 @@ export const authApi = {
     }
 
     // 1. Create the user in Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, input.email, input.password);
+    let userCredential;
+    try {
+      userCredential = await createUserWithEmailAndPassword(auth, input.email, input.password);
+    } catch (error) {
+      if (isFirebaseConfigError(error)) {
+        return completeLocalAuth(createLocalUser(input.email, input.role, input.fullName));
+      }
+      throw error;
+    }
     
     // 2. Update their display name in Auth
     await updateProfile(userCredential.user, { displayName: input.fullName });
@@ -181,7 +202,15 @@ export const authApi = {
     }
 
     const provider = new GoogleAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
+    let userCredential;
+    try {
+      userCredential = await signInWithPopup(auth, provider);
+    } catch (error) {
+      if (isFirebaseConfigError(error)) {
+        return completeLocalAuth(createLocalUser("google.user@ust.local", "student", "Google User"));
+      }
+      throw error;
+    }
     
     // Check if user already exists in Firestore
     const userDocRef = doc(usersCollection, userCredential.user.uid);
