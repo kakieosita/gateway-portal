@@ -93,6 +93,27 @@ function AdminUsers() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      if (!hasFirebaseCredentials) {
+        // Demo mode: simulate user creation locally
+        const mockUser: User = {
+          id: `demo-${Date.now()}`,
+          email: formData.email,
+          displayName: formData.name,
+          photoURL: null,
+          role: formData.role,
+          status: "Active",
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        };
+        setUsers((prev) => [mockUser, ...prev]);
+        toast.success(`${formData.name} added (demo mode — backend not configured)`);
+        setIsAddModalOpen(false);
+        setFormData({ name: "", email: "", password: "", role: activeTab });
+        setContractFile(null);
+        setIsSubmitting(false);
+        return;
+      }
+
       // 1. Create in Firebase Auth (Secondary app to avoid logout)
       const userCredential = await createUserWithEmailAndPassword(secondaryAuth, formData.email, formData.password);
       const uid = userCredential.user.uid;
