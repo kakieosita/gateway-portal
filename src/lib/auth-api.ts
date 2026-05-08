@@ -79,7 +79,16 @@ function isFirebaseConfigError(error: unknown) {
 
 export const authApi = {
   async login(input: LoginInput) {
+    // Check demo store first (works in both demo and real mode for admin-created demo users)
+    const demoMatch = demoUserStore.findByEmail(input.email);
+    if (demoMatch && demoMatch.password === input.password) {
+      return completeLocalAuth(demoMatch.user);
+    }
+
     if (!hasFirebaseCredentials) {
+      if (demoMatch) {
+        throw new Error("Incorrect password");
+      }
       return completeLocalAuth(createLocalUser(input.email, inferRole(input.email, input.password)));
     }
 
