@@ -1,10 +1,11 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { DashboardSidebar } from "@/components/dashboard/Sidebar";
 import { DashboardTopbar } from "@/components/dashboard/Topbar";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { redirect } from "@tanstack/react-router";
+import { authApi } from "@/lib/auth-api";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: async ({ location }) => {
@@ -38,7 +39,20 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardLayout() {
   const { user, loading } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate({ to: "/login", search: { redirect: location.href } as never });
+      return;
+    }
+    if (user.role !== "student" && user.role !== "admin") {
+      navigate({ to: authApi.getDashboardRoute(user.role) as never });
+    }
+  }, [loading, location.href, navigate, user]);
 
   if (loading) {
     return (
@@ -49,6 +63,7 @@ function DashboardLayout() {
   }
 
   if (!user) return null;
+  if (user.role !== "student" && user.role !== "admin") return null;
 
   return (
     <div className="min-h-screen bg-gradient-soft">
