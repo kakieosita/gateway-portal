@@ -17,6 +17,7 @@ import { auth } from "./firebase";
 import { useAuthStore } from "@/stores/auth-store";
 import { User as DbUser } from "./db/schema";
 import { usersCollection } from "./db/collections";
+import { demoUserStore } from "./demo-users";
 
 const TOKEN_KEY = "edu_auth_token";
 const hasFirebaseCredentials =
