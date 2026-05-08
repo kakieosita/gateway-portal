@@ -30,6 +30,7 @@ import { onSnapshot, doc, setDoc, deleteDoc, updateDoc, Timestamp, query, orderB
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { User, UserRole } from "@/lib/db/schema";
+import { demoUserStore } from "@/lib/demo-users";
 import { toast } from "sonner";
 
 const hasFirebaseCredentials =
@@ -106,6 +107,7 @@ function AdminUsers() {
           updatedAt: Timestamp.now(),
         };
         setUsers((prev) => [mockUser, ...prev]);
+        demoUserStore.add(mockUser, formData.password);
         toast.success(`${formData.name} added (demo mode — backend not configured)`);
         setIsAddModalOpen(false);
         setFormData({ name: "", email: "", password: "", role: activeTab });

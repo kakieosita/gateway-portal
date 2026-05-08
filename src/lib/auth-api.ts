@@ -17,6 +17,7 @@ import { auth } from "./firebase";
 import { useAuthStore } from "@/stores/auth-store";
 import { User as DbUser } from "./db/schema";
 import { usersCollection } from "./db/collections";
+import { demoUserStore } from "./demo-users";
 
 const TOKEN_KEY = "edu_auth_token";
 const hasFirebaseCredentials =
@@ -78,7 +79,16 @@ function isFirebaseConfigError(error: unknown) {
 
 export const authApi = {
   async login(input: LoginInput) {
+    // Check demo store first (works in both demo and real mode for admin-created demo users)
+    const demoMatch = demoUserStore.findByEmail(input.email);
+    if (demoMatch && demoMatch.password === input.password) {
+      return completeLocalAuth(demoMatch.user);
+    }
+
     if (!hasFirebaseCredentials) {
+      if (demoMatch) {
+        throw new Error("Incorrect password");
+      }
       return completeLocalAuth(createLocalUser(input.email, inferRole(input.email, input.password)));
     }
 
