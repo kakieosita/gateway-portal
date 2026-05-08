@@ -107,6 +107,7 @@ function AdminUsers() {
           updatedAt: Timestamp.now(),
         };
         setUsers((prev) => [mockUser, ...prev]);
+        demoUserStore.add(mockUser, formData.password);
         toast.success(`${formData.name} added (demo mode — backend not configured)`);
         setIsAddModalOpen(false);
         setFormData({ name: "", email: "", password: "", role: activeTab });
