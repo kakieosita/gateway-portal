@@ -1,10 +1,11 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { InstructorSidebar } from "@/components/instructor/Sidebar";
 import { InstructorTopbar } from "@/components/instructor/Topbar";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { redirect } from "@tanstack/react-router";
+import { authApi } from "@/lib/auth-api";
 
 export const Route = createFileRoute("/instructor")({
   beforeLoad: async ({ location }) => {
@@ -34,7 +35,20 @@ export const Route = createFileRoute("/instructor")({
 
 function InstructorLayout() {
   const { user, loading } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate({ to: "/login", search: { redirect: location.href } as never });
+      return;
+    }
+    if (user.role !== "instructor" && user.role !== "admin") {
+      navigate({ to: authApi.getDashboardRoute(user.role) as never });
+    }
+  }, [loading, location.href, navigate, user]);
 
   if (loading) {
     return (
@@ -45,6 +59,7 @@ function InstructorLayout() {
   }
 
   if (!user) return null;
+  if (user.role !== "instructor" && user.role !== "admin") return null;
 
   return (
     <div className="min-h-screen bg-gradient-soft">
