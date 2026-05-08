@@ -20,6 +20,7 @@ import { usersCollection } from "./db/collections";
 import { demoUserStore } from "./demo-users";
 
 const TOKEN_KEY = "edu_auth_token";
+const USER_KEY = "edu_auth_user";
 const hasFirebaseCredentials =
   typeof import.meta.env.VITE_FIREBASE_API_KEY === "string" &&
   import.meta.env.VITE_FIREBASE_API_KEY.startsWith("AIza") &&
@@ -67,6 +68,7 @@ function completeLocalAuth(user: DbUser) {
   const token = `demo-token-${user.id}`;
   if (typeof window !== "undefined") {
     sessionStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
   }
   useAuthStore.getState().setUser(user);
   return { token, user };
@@ -120,6 +122,7 @@ export const authApi = {
     
     // Update store immediately to avoid race conditions with onAuthStateChanged
     useAuthStore.getState().setUser(userData);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
 
     return { token, user: userData };
   },
@@ -171,6 +174,7 @@ export const authApi = {
     };
 
     useAuthStore.getState().setUser(userData);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
 
     return { token, user: userData };
   },
@@ -250,6 +254,7 @@ export const authApi = {
     const userData = finalUserDoc.data() as DbUser;
     
     useAuthStore.getState().setUser(userData);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
 
     return { token, user: userData };
   },
@@ -260,6 +265,7 @@ export const authApi = {
     }
     if (typeof window !== "undefined") {
       sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(USER_KEY);
     }
     useAuthStore.getState().setUser(null);
   },
