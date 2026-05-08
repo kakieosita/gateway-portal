@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatchRoute, Link } from "@tanstack/react-router";
 import { AlumniSidebar } from "@/components/alumni/AlumniSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -46,7 +46,30 @@ function AlumniLayout() {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background px-4 text-center">
+        <div>
+          <p className="text-lg font-semibold text-foreground">Please sign in to continue.</p>
+          <Link to="/alumni/login" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">
+            Go to alumni sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (user.role !== "alumni" && user.role !== "admin") {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background px-4 text-center">
+        <div>
+          <p className="text-lg font-semibold text-foreground">This dashboard is for alumni.</p>
+          <Link to="/" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">
+            Go home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>

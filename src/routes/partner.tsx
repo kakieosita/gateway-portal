@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatchRoute, Link } from "@tanstack/react-router";
 import { PartnerSidebar } from "@/components/partner/PartnerSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -46,7 +46,30 @@ function PartnerLayout() {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background px-4 text-center">
+        <div>
+          <p className="text-lg font-semibold text-foreground">Please sign in to continue.</p>
+          <Link to="/partner/login" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">
+            Go to partner sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (user.role !== "partner" && user.role !== "admin") {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background px-4 text-center">
+        <div>
+          <p className="text-lg font-semibold text-foreground">This dashboard is for partners.</p>
+          <Link to="/" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">
+            Go home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>

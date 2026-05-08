@@ -5,6 +5,18 @@ import { auth, db } from "@/lib/firebase";
 import { UserRole, User } from "@/lib/db/schema";
 import { usersCollection } from "@/lib/db/collections";
 
+const LOCAL_USER_KEY = "edu_auth_user";
+
+function getStoredUser(): User | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return JSON.parse(sessionStorage.getItem(LOCAL_USER_KEY) || "null") as User | null;
+  } catch {
+    sessionStorage.removeItem(LOCAL_USER_KEY);
+    return null;
+  }
+}
+
 interface AuthState {
   user: User | null;
   firebaseUser: FirebaseUser | null;
@@ -27,6 +39,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: () => {
     // Prevent multiple initializations
     if (useAuthStore.getState().initialized) return;
+
+    const storedUser = getStoredUser();
+    if (storedUser) {
+      set({ user: storedUser, firebaseUser: null, loading: false, initialized: true });
+      return;
+    }
 
     onAuthStateChanged(auth, async (firebaseUser) => {
       set({ firebaseUser, initialized: true });

@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { DashboardSidebar } from "@/components/dashboard/Sidebar";
 import { DashboardTopbar } from "@/components/dashboard/Topbar";
@@ -48,7 +48,30 @@ function DashboardLayout() {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background px-4 text-center">
+        <div>
+          <p className="text-lg font-semibold text-foreground">Please sign in to continue.</p>
+          <Link to="/login" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">
+            Go to sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (user.role !== "student" && user.role !== "admin") {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background px-4 text-center">
+        <div>
+          <p className="text-lg font-semibold text-foreground">This dashboard is for students.</p>
+          <Link to="/" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">
+            Go home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-soft">
