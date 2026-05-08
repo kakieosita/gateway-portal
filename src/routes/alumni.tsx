@@ -1,9 +1,11 @@
-import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation, useMatchRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AlumniSidebar } from "@/components/alumni/AlumniSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { redirect } from "@tanstack/react-router";
+import { authApi } from "@/lib/auth-api";
 
 export const Route = createFileRoute("/alumni")({
   beforeLoad: async ({ location }) => {
@@ -32,6 +34,19 @@ function AlumniLayout() {
   const matchRoute = useMatchRoute();
   const isLoginPage = matchRoute({ to: "/alumni/login" });
   const { user, loading } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (isLoginPage || loading) return;
+    if (!user) {
+      navigate({ to: "/alumni/login", search: { redirect: location.href } as never });
+      return;
+    }
+    if (user.role !== "alumni" && user.role !== "admin") {
+      navigate({ to: authApi.getDashboardRoute(user.role) as never });
+    }
+  }, [isLoginPage, loading, location.href, navigate, user]);
 
   // Login page renders standalone — no sidebar
   if (isLoginPage) {
@@ -47,6 +62,7 @@ function AlumniLayout() {
   }
 
   if (!user) return null;
+  if (user.role !== "alumni" && user.role !== "admin") return null;
 
   return (
     <SidebarProvider>
