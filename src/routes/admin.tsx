@@ -1,12 +1,10 @@
-import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { redirect } from "@tanstack/react-router";
-import { authApi } from "@/lib/auth-api";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async ({ location }) => {
@@ -30,19 +28,6 @@ export const Route = createFileRoute("/admin")({
 
 function AdminLayout() {
   const { user, loading } = useAuthStore();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (loading) return;
-    if (!user) {
-      navigate({ to: "/login", search: { redirect: location.href } as never });
-      return;
-    }
-    if (user.role !== "admin") {
-      navigate({ to: authApi.getDashboardRoute(user.role) as never });
-    }
-  }, [loading, location.href, navigate, user]);
 
   if (loading) {
     return (
@@ -52,8 +37,30 @@ function AdminLayout() {
     );
   }
 
-  if (!user) return null;
-  if (user.role !== "admin") return null;
+  if (!user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background px-4 text-center">
+        <div>
+          <p className="text-lg font-semibold text-foreground">Please sign in to continue.</p>
+          <Link to="/login" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">
+            Go to sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (user.role !== "admin") {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background px-4 text-center">
+        <div>
+          <p className="text-lg font-semibold text-foreground">This area is for admins only.</p>
+          <Link to="/" className="mt-3 inline-flex text-sm font-medium text-primary hover:underline">
+            Go home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
