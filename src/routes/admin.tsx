@@ -1,10 +1,12 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { redirect } from "@tanstack/react-router";
+import { authApi } from "@/lib/auth-api";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async ({ location }) => {
@@ -28,6 +30,19 @@ export const Route = createFileRoute("/admin")({
 
 function AdminLayout() {
   const { user, loading } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate({ to: "/login", search: { redirect: location.href } as never });
+      return;
+    }
+    if (user.role !== "admin") {
+      navigate({ to: authApi.getDashboardRoute(user.role) as never });
+    }
+  }, [loading, location.href, navigate, user]);
 
   if (loading) {
     return (
@@ -38,6 +53,7 @@ function AdminLayout() {
   }
 
   if (!user) return null;
+  if (user.role !== "admin") return null;
 
   return (
     <SidebarProvider>
