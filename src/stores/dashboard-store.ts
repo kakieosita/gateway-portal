@@ -1,31 +1,41 @@
 import { create } from "zustand";
-import {
-  mockCourses,
-  mockAssignments,
-  mockCertificates,
-  mockActivity,
-  mockUser,
-  mockQuizzes,
-  mockGrades,
-  mockAttendance,
-  mockInvoices,
-  mockForumPosts,
-  mockEvents,
-  mockAnnouncements,
-  type Course,
-  type Assignment,
-  type Certificate,
-  type Activity,
-  type Quiz,
-  type Grade,
-  type Attendance,
-  type Invoice,
-  type ForumPost,
-  type Event,
-  type Announcement,
+import { 
+  type Course, 
+  type Assignment, 
+  type Certificate, 
+  type Activity, 
+  type Quiz, 
+  type Grade, 
+  type Attendance, 
+  type Invoice, 
+  type ForumPost, 
+  type Event, 
+  type Announcement 
 } from "@/lib/dashboard-data";
+import { 
+  onSnapshot, 
+  query, 
+  where, 
+  doc, 
+  updateDoc 
+} from "firebase/firestore";
+import { 
+  db, storage 
+} from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { 
+  enrollmentsCollection, 
+  programsCollection, 
+  assignmentsCollection, 
+  certificatesCollection, 
+  activitiesCollection, 
+  announcementsCollection,
+  eventsCollection,
+  usersCollection
+} from "@/lib/db/collections";
+import { User as DbUser } from "@/lib/db/schema";
 
-type User = typeof mockUser;
+type User = DbUser;
 
 type DashboardState = {
   courses: Course[];
@@ -42,26 +52,27 @@ type DashboardState = {
   announcements: Announcement[];
   loading: boolean;
   toggleLesson: (courseId: string, lessonId: string) => void;
-  submitAssignment: (id: string) => void;
+  submitAssignment: (id: string, file: File) => Promise<void>;
   updateUser: (patch: Partial<User>) => void;
   payInvoice: (id: string) => void;
   enrollCourse: (id: string) => void;
+  initialize: (userId: string) => () => void;
 };
 
-export const useDashboardStore = create<DashboardState>((set) => ({
-  courses: mockCourses,
-  assignments: mockAssignments,
-  certificates: mockCertificates,
-  activity: mockActivity,
-  user: mockUser,
-  quizzes: mockQuizzes,
-  grades: mockGrades,
-  attendance: mockAttendance,
-  invoices: mockInvoices,
-  forumPosts: mockForumPosts,
-  events: mockEvents,
-  announcements: mockAnnouncements,
-  loading: false,
+export const useDashboardStore = create<DashboardState>((set, get) => ({
+  courses: [],
+  assignments: [],
+  certificates: [],
+  activity: [],
+  user: {} as any,
+  quizzes: [],
+  grades: [],
+  attendance: [],
+  invoices: [],
+  forumPosts: [],
+  events: [],
+  announcements: [],
+  loading: true,
   toggleLesson: (courseId, lessonId) =>
     set((state) => ({
       courses: state.courses.map((c) => {
@@ -74,12 +85,25 @@ export const useDashboardStore = create<DashboardState>((set) => ({
         return { ...c, lessons, completedLessons, progress };
       }),
     })),
-  submitAssignment: (id) =>
-    set((state) => ({
-      assignments: state.assignments.map((a) =>
-        a.id === id ? { ...a, status: "submitted" as const } : a,
-      ),
-    })),
+  submitAssignment: async (id, file) => {
+    const userId = get().user.id;
+    const storageRef = ref(storage, `submissions/${userId}/${id}/${file.name}`);
+    
+    try {
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      
+      await updateDoc(doc(assignmentsCollection, id), {
+        status: "submitted",
+        submissionUrl: url,
+        updatedAt: new Date() // Assignment schema might need updatedAt but we'll stick to status/url
+      } as any);
+      
+    } catch (error) {
+      console.error("Assignment submission failed:", error);
+      throw error;
+    }
+  },
   updateUser: (patch) => set((state) => ({ user: { ...state.user, ...patch } })),
   payInvoice: (id) =>
     set((state) => ({
@@ -88,9 +112,46 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       ),
     })),
   enrollCourse: (_id) => {
-    // Mock implementation: normally we'd add the course from a global catalog
-    // For now, we'll just show a success message or handle it in the component.
-    // To make it simple, we don't mutate the courses list here because mockCourses
-    // is already the list of enrolled courses. We will just use a toast in the UI.
+    // Implement real enrollment logic here
   },
+  initialize: (userId) => {
+    set({ loading: true });
+    
+    const unsubs: (() => void)[] = [];
+
+    // 1. Sync User Profile
+    unsubs.push(onSnapshot(doc(usersCollection, userId), (snap) => {
+      if (snap.exists()) set({ user: snap.data() as any });
+    }));
+
+    // 2. Sync Enrollments & Courses
+    unsubs.push(onSnapshot(query(enrollmentsCollection, where("studentId", "==", userId)), async (snap) => {
+      const enrollments = snap.docs.map(d => d.data());
+      // In a real app, you'd fetch the corresponding programs here
+      // For now, we'll keep it simple
+      set({ loading: false });
+    }));
+
+    // 3. Sync Assignments
+    unsubs.push(onSnapshot(query(assignmentsCollection, where("studentId", "==", userId)), (snap) => {
+      set({ assignments: snap.docs.map(d => ({ ...d.data(), id: d.id } as any)) });
+    }));
+
+    // 4. Sync Activities
+    unsubs.push(onSnapshot(query(activitiesCollection, where("userId", "==", userId)), (snap) => {
+      set({ activity: snap.docs.map(d => ({ ...d.data(), id: d.id } as any)) });
+    }));
+
+    // 5. Sync Announcements (Global)
+    unsubs.push(onSnapshot(announcementsCollection, (snap) => {
+      set({ announcements: snap.docs.map(d => ({ ...d.data(), id: d.id } as any)) });
+    }));
+
+    // 6. Sync Events
+    unsubs.push(onSnapshot(eventsCollection, (snap) => {
+      set({ events: snap.docs.map(d => ({ ...d.data(), id: d.id } as any)) });
+    }));
+
+    return () => unsubs.forEach(unsub => unsub());
+  }
 }));

@@ -16,15 +16,10 @@ import { doc, setDoc, getDoc, Timestamp } from "firebase/firestore";
 import { auth } from "./firebase";
 import { useAuthStore } from "@/stores/auth-store";
 import { User as DbUser } from "./db/schema";
-import { usersCollection } from "./db/collections";
-import { demoUserStore } from "./demo-users";
+import { usersCollection, studentsCollection, instructorsCollection } from "./db/collections";
 
 const TOKEN_KEY = "edu_auth_token";
 const USER_KEY = "edu_auth_user";
-const hasFirebaseCredentials =
-  typeof import.meta.env.VITE_FIREBASE_API_KEY === "string" &&
-  import.meta.env.VITE_FIREBASE_API_KEY.startsWith("AIza") &&
-  Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
 
 export type Role = "student" | "instructor" | "alumni" | "partner" | "admin";
 
@@ -38,40 +33,13 @@ export interface SignupInput {
   email: string;
   password: string;
   role: Role;
-}
-
-function inferRole(email: string, password = ""): Role {
-  const signal = `${email} ${password}`.toLowerCase();
-  if (signal.includes("admin") || signal.includes("ust001")) return "admin";
-  if (signal.includes("instructor") || signal.includes("teacher")) return "instructor";
-  if (signal.includes("alumni")) return "alumni";
-  if (signal.includes("partner")) return "partner";
-  return "student";
-}
-
-function createLocalUser(email: string, role: Role, fullName?: string): DbUser {
-  const normalizedEmail = email.trim().toLowerCase() || "demo@ust.local";
-  const now = Timestamp.now();
-  return {
-    id: `demo-${role}-${normalizedEmail.replace(/[^a-z0-9]/g, "-")}`,
-    email: normalizedEmail,
-    displayName: fullName || normalizedEmail.split("@")[0].replace(/[._-]/g, " "),
-    photoURL: null,
-    role,
-    status: "Active",
-    createdAt: now,
-    updatedAt: now,
-  };
-}
-
-function completeLocalAuth(user: DbUser) {
-  const token = `demo-token-${user.id}`;
-  if (typeof window !== "undefined") {
-    sessionStorage.setItem(TOKEN_KEY, token);
-    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
-  }
-  useAuthStore.getState().setUser(user);
-  return { token, user };
+  age?: number;
+  gender?: string;
+  interestedCourse?: string;
+  phoneNumber?: string;
+  nextOfKin?: string;
+  nextOfKinPhoneNumber?: string;
+  address?: string;
 }
 
 function isFirebaseConfigError(error: unknown) {
@@ -81,28 +49,7 @@ function isFirebaseConfigError(error: unknown) {
 
 export const authApi = {
   async login(input: LoginInput) {
-    // Check demo store first (works in both demo and real mode for admin-created demo users)
-    const demoMatch = demoUserStore.findByEmail(input.email);
-    if (demoMatch && demoMatch.password === input.password) {
-      return completeLocalAuth(demoMatch.user);
-    }
-
-    if (!hasFirebaseCredentials) {
-      if (demoMatch) {
-        throw new Error("Incorrect password");
-      }
-      return completeLocalAuth(createLocalUser(input.email, inferRole(input.email, input.password)));
-    }
-
-    let userCredential;
-    try {
-      userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
-    } catch (error) {
-      if (isFirebaseConfigError(error)) {
-        return completeLocalAuth(createLocalUser(input.email, inferRole(input.email, input.password)));
-      }
-      throw error;
-    }
+    const userCredential = await signInWithEmailAndPassword(auth, input.email, input.password);
     
     /* 
     // Check if email is verified
@@ -118,7 +65,18 @@ export const authApi = {
 
     // Fetch the user's role from Firestore
     const userDoc = await getDoc(doc(usersCollection, userCredential.user.uid));
-    const userData = (userDoc.data() as DbUser | undefined) ?? createLocalUser(input.email, "student");
+    if (!userDoc.exists()) {
+       throw new Error("User profile not found in database.");
+    }
+    const userData = userDoc.data() as DbUser;
+
+    // Check for suspension
+    if (userData.status === "Suspended" || userData.status === "Inactive") {
+      await signOut(auth);
+      sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(USER_KEY);
+      throw new Error("Your account has been suspended or is inactive. Please contact the administrator.");
+    }
     
     // Update store immediately to avoid race conditions with onAuthStateChanged
     useAuthStore.getState().setUser(userData);
@@ -128,40 +86,11 @@ export const authApi = {
   },
 
   async signup(input: SignupInput) {
-    if (!hasFirebaseCredentials) {
-      return completeLocalAuth(createLocalUser(input.email, input.role, input.fullName));
-    }
-
     // 1. Create the user in Firebase Auth
-    let userCredential;
-    try {
-      userCredential = await createUserWithEmailAndPassword(auth, input.email, input.password);
-    } catch (error) {
-      if (isFirebaseConfigError(error)) {
-        return completeLocalAuth(createLocalUser(input.email, input.role, input.fullName));
-      }
-      throw error;
-    }
+    const userCredential = await createUserWithEmailAndPassword(auth, input.email, input.password);
     
     // 2. Update their display name in Auth
     await updateProfile(userCredential.user, { displayName: input.fullName });
-
-    // 3. Create the user document in Firestore
-    await setDoc(doc(usersCollection, userCredential.user.uid), {
-      id: userCredential.user.uid,
-      email: input.email,
-      displayName: input.fullName,
-      photoURL: null,
-      role: input.role,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    });
-    
-    // 4. Send verification email
-    await sendEmailVerification(userCredential.user);
-
-    const token = await userCredential.user.getIdToken();
-    sessionStorage.setItem(TOKEN_KEY, token);
 
     const userData: DbUser = {
       id: userCredential.user.uid,
@@ -169,9 +98,33 @@ export const authApi = {
       displayName: input.fullName,
       photoURL: null,
       role: input.role,
+      age: input.age,
+      gender: input.gender,
+      interestedCourse: input.interestedCourse,
+      phoneNumber: input.phoneNumber,
+      nextOfKin: input.nextOfKin,
+      nextOfKinPhoneNumber: input.nextOfKinPhoneNumber,
+      address: input.address,
+      status: "Active",
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     };
+
+    // 3. Create the user document in Firestore
+    await setDoc(doc(usersCollection, userCredential.user.uid), userData);
+    
+    // 4. Duplicate into students collection if student
+    if (input.role === "student") {
+      await setDoc(doc(studentsCollection, userCredential.user.uid), userData);
+    } else if (input.role === "instructor") {
+      await setDoc(doc(instructorsCollection, userCredential.user.uid), userData);
+    }
+    
+    // 5. Send verification email
+    await sendEmailVerification(userCredential.user);
+
+    const token = await userCredential.user.getIdToken();
+    sessionStorage.setItem(TOKEN_KEY, token);
 
     useAuthStore.getState().setUser(userData);
     sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
@@ -180,19 +133,15 @@ export const authApi = {
   },
 
   async forgotPassword(email: string) {
-    if (!hasFirebaseCredentials) {
-      return { message: `Reset link sent to ${email}` };
-    }
-
     await sendPasswordResetEmail(auth, email);
     return { message: `Reset link sent to ${email}` };
   },
 
-  async resetPassword(actionCode: string, password: string) {
-    if (!hasFirebaseCredentials) {
-      return { message: "Password updated" };
-    }
+  async sendPasswordReset(email: string) {
+    return this.forgotPassword(email);
+  },
 
+  async resetPassword(actionCode: string, password: string) {
     // Verify the code before confirming
     await verifyPasswordResetCode(auth, actionCode);
     await confirmPasswordReset(auth, actionCode, password);
@@ -200,10 +149,6 @@ export const authApi = {
   },
 
   async verifyEmail(actionCode: string) {
-    if (!hasFirebaseCredentials) {
-      return { verified: true };
-    }
-
     // Verify the email action code
     await checkActionCode(auth, actionCode);
     await applyActionCode(auth, actionCode);
@@ -211,20 +156,8 @@ export const authApi = {
   },
 
   async google() {
-    if (!hasFirebaseCredentials) {
-      return completeLocalAuth(createLocalUser("google.user@ust.local", "student", "Google User"));
-    }
-
     const provider = new GoogleAuthProvider();
-    let userCredential;
-    try {
-      userCredential = await signInWithPopup(auth, provider);
-    } catch (error) {
-      if (isFirebaseConfigError(error)) {
-        return completeLocalAuth(createLocalUser("google.user@ust.local", "student", "Google User"));
-      }
-      throw error;
-    }
+    const userCredential = await signInWithPopup(auth, provider);
     
     // Check if user already exists in Firestore
     const userDocRef = doc(usersCollection, userCredential.user.uid);
@@ -252,6 +185,14 @@ export const authApi = {
 
     const finalUserDoc = await getDoc(userDocRef);
     const userData = finalUserDoc.data() as DbUser;
+
+    // Check for suspension
+    if (userData.status === "Suspended" || userData.status === "Inactive") {
+      await signOut(auth);
+      sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(USER_KEY);
+      throw new Error("Your account has been suspended or is inactive. Please contact the administrator.");
+    }
     
     useAuthStore.getState().setUser(userData);
     sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
@@ -260,9 +201,7 @@ export const authApi = {
   },
 
   async logout() {
-    if (hasFirebaseCredentials) {
-      await signOut(auth);
-    }
+    await signOut(auth);
     if (typeof window !== "undefined") {
       sessionStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(USER_KEY);

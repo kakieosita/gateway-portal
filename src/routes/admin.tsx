@@ -5,6 +5,7 @@ import { AdminTopbar } from "@/components/admin/AdminTopbar";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { redirect } from "@tanstack/react-router";
+import { authApi } from "@/lib/auth-api";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async ({ location }) => {
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/admin")({
     }
 
     if (user && user.role !== "admin") {
-      throw redirect({ to: "/" });
+      throw redirect({ to: authApi.getDashboardRoute(user.role) });
     }
   },
   component: AdminLayout,

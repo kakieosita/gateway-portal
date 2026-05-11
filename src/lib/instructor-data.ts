@@ -25,23 +25,28 @@ export type EnrolledStudent = {
 export type InstructorAssignment = {
   id: string;
   title: string;
-  course: string;
+  courseId: string;
+  courseName: string;
   type: "assignment" | "quiz";
   dueDate: string;
   submissions: number;
   totalStudents: number;
   graded: number;
+  description?: string;
 };
 
 export type Submission = {
   id: string;
   assignmentId: string;
+  studentId: string;
   studentName: string;
+  studentEmail: string;
   submittedAt: string;
   status: "pending" | "graded";
   grade?: string;
   feedback?: string;
   fileName: string;
+  fileUrl: string;
 };
 
 export type ActivityItem = {
@@ -128,18 +133,18 @@ export const enrolledStudents: EnrolledStudent[] = Array.from({ length: 36 }, (_
 });
 
 export const instructorAssignments: InstructorAssignment[] = [
-  { id: "ia1", title: "Build a REST API with Express", course: "Full-Stack Web Development", type: "assignment", dueDate: "2026-04-28", submissions: 198, totalStudents: 248, graded: 142 },
-  { id: "ia2", title: "TypeScript Generics Quiz", course: "Advanced TypeScript Patterns", type: "quiz", dueDate: "2026-04-25", submissions: 134, totalStudents: 156, graded: 134 },
-  { id: "ia3", title: "Deploy a Static Site to S3", course: "Cloud Engineering with AWS", type: "assignment", dueDate: "2026-04-30", submissions: 87, totalStudents: 192, graded: 40 },
-  { id: "ia4", title: "System Design: URL Shortener", course: "Intro to System Design", type: "assignment", dueDate: "2026-05-05", submissions: 22, totalStudents: 84, graded: 0 },
+  { id: "ia1", title: "Build a REST API with Express", courseId: "ic1", courseName: "Full-Stack Web Development", type: "assignment", dueDate: "2026-04-28", submissions: 198, totalStudents: 248, graded: 142 },
+  { id: "ia2", title: "TypeScript Generics Quiz", courseId: "ic2", courseName: "Advanced TypeScript Patterns", type: "quiz", dueDate: "2026-04-25", submissions: 134, totalStudents: 156, graded: 134 },
+  { id: "ia3", title: "Deploy a Static Site to S3", courseId: "ic3", courseName: "Cloud Engineering with AWS", type: "assignment", dueDate: "2026-04-30", submissions: 87, totalStudents: 192, graded: 40 },
+  { id: "ia4", title: "System Design: URL Shortener", courseId: "ic5", courseName: "Intro to System Design", type: "assignment", dueDate: "2026-05-05", submissions: 22, totalStudents: 84, graded: 0 },
 ];
 
 export const submissions: Submission[] = [
-  { id: "sub1", assignmentId: "ia1", studentName: "Adaeze Okonkwo", submittedAt: "2 hours ago", status: "pending", fileName: "rest-api.zip" },
-  { id: "sub2", assignmentId: "ia1", studentName: "Tunde Bakare", submittedAt: "5 hours ago", status: "graded", grade: "A", feedback: "Excellent implementation of middleware.", fileName: "express-api.zip" },
-  { id: "sub3", assignmentId: "ia3", studentName: "Aisha Ibrahim", submittedAt: "Yesterday", status: "pending", fileName: "s3-deploy.pdf" },
-  { id: "sub4", assignmentId: "ia2", studentName: "Emeka Nwosu", submittedAt: "Yesterday", status: "graded", grade: "B+", feedback: "Good effort, but check the closure questions again.", fileName: "quiz-attempt-1.json" },
-  { id: "sub5", assignmentId: "ia1", studentName: "Ngozi Eze", submittedAt: "2 days ago", status: "graded", grade: "A-", feedback: "Very clean code.", fileName: "api-final.zip" },
+  { id: "sub1", assignmentId: "ia1", studentId: "s1", studentName: "Adaeze Okonkwo", studentEmail: "adaeze.okonkwo@upskill.edu.ng", submittedAt: "2 hours ago", status: "pending", fileName: "rest-api.zip", fileUrl: "#" },
+  { id: "sub2", assignmentId: "ia1", studentId: "s2", studentName: "Tunde Bakare", studentEmail: "tunde.bakare@upskill.edu.ng", submittedAt: "5 hours ago", status: "graded", grade: "A", feedback: "Excellent implementation of middleware.", fileName: "express-api.zip", fileUrl: "#" },
+  { id: "sub3", assignmentId: "ia3", studentId: "s3", studentName: "Aisha Ibrahim", studentEmail: "aisha.ibrahim@upskill.edu.ng", submittedAt: "Yesterday", status: "pending", fileName: "s3-deploy.pdf", fileUrl: "#" },
+  { id: "sub4", assignmentId: "ia2", studentId: "s4", studentName: "Emeka Nwosu", studentEmail: "emeka.nwosu@upskill.edu.ng", submittedAt: "Yesterday", status: "graded", grade: "B+", feedback: "Good effort, but check the closure questions again.", fileName: "quiz-attempt-1.json", fileUrl: "#" },
+  { id: "sub5", assignmentId: "ia1", studentId: "s5", studentName: "Ngozi Eze", studentEmail: "ngozi.eze@upskill.edu.ng", submittedAt: "2 days ago", status: "graded", grade: "A-", feedback: "Very clean code.", fileName: "api-final.zip", fileUrl: "#" },
 ];
 
 export const instructorSchedules: ScheduleSession[] = [

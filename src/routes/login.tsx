@@ -46,12 +46,7 @@ function LoginPage() {
     setServerError(null);
     try {
       const { user } = await authApi.login({ email: data.email, password: data.password });
-      
-      if (user.role === "admin") navigate({ to: "/admin" });
-      else if (user.role === "instructor") navigate({ to: "/instructor" });
-      else if (user.role === "alumni") navigate({ to: "/alumni" });
-      else if (user.role === "partner") navigate({ to: "/partner" });
-      else navigate({ to: "/dashboard" });
+      navigate({ to: authApi.getDashboardRoute(user.role) });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Something went wrong");
     }
@@ -62,12 +57,7 @@ function LoginPage() {
     setServerError(null);
     try {
       const { user } = await authApi.google();
-      
-      if (user.role === "admin") navigate({ to: "/admin" });
-      else if (user.role === "instructor") navigate({ to: "/instructor" });
-      else if (user.role === "alumni") navigate({ to: "/alumni" });
-      else if (user.role === "partner") navigate({ to: "/partner" });
-      else navigate({ to: "/dashboard" });
+      navigate({ to: authApi.getDashboardRoute(user.role) });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Google sign in failed");
     } finally {

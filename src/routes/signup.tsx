@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
@@ -33,6 +34,13 @@ const schema = z.object({
     .regex(/[A-Z]/, "Add an uppercase letter")
     .regex(/[0-9]/, "Add a number"),
   role: z.enum(["student", "instructor"]),
+  age: z.string().optional().refine(val => !val || !isNaN(Number(val)), "Age must be a number"),
+  gender: z.string().optional(),
+  interestedCourse: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  nextOfKin: z.string().optional(),
+  nextOfKinPhoneNumber: z.string().optional(),
+  address: z.string().optional(),
   terms: z.boolean().refine((v) => v === true, { message: "You must accept the terms" }),
 });
 type FormData = z.infer<typeof schema>;
@@ -54,7 +62,7 @@ function SignupPage() {
     defaultValues: { role: "student" },
   });
 
-  const role = watch("role");
+  const watchRole = watch("role");
   const password = watch("password") ?? "";
 
   const onSubmit = async (data: FormData) => {
@@ -65,6 +73,13 @@ function SignupPage() {
         email: data.email,
         password: data.password,
         role: data.role,
+        age: data.age ? Number(data.age) : undefined,
+        gender: data.gender,
+        interestedCourse: data.interestedCourse,
+        phoneNumber: data.phoneNumber,
+        nextOfKin: data.nextOfKin,
+        nextOfKinPhoneNumber: data.nextOfKinPhoneNumber,
+        address: data.address,
       });
       
       navigate({ to: "/verify-email", search: { email: data.email } });
@@ -77,12 +92,7 @@ function SignupPage() {
     setLoadingGoogle(true);
     try {
       const { user } = await authApi.google();
-      
-      if (user.role === "admin") navigate({ to: "/admin" });
-      else if (user.role === "instructor") navigate({ to: "/instructor" });
-      else if (user.role === "alumni") navigate({ to: "/alumni" });
-      else if (user.role === "partner") navigate({ to: "/partner" });
-      else navigate({ to: "/dashboard" });
+      navigate({ to: authApi.getDashboardRoute(user.role) });
     } catch (e) {
       setServerError(e instanceof Error ? e.message : "Google sign up failed");
     } finally {
@@ -114,14 +124,14 @@ function SignupPage() {
               icon={<GraduationCap className="h-5 w-5" />}
               label="Student"
               description="Take courses"
-              selected={role === "student"}
+              selected={watchRole === "student"}
               onClick={() => setValue("role", "student", { shouldValidate: true })}
             />
             <RoleCard
               icon={<Briefcase className="h-5 w-5" />}
               label="Instructor"
               description="Teach courses"
-              selected={role === "instructor"}
+              selected={watchRole === "instructor"}
               onClick={() => setValue("role", "instructor", { shouldValidate: true })}
             />
           </div>
@@ -145,6 +155,72 @@ function SignupPage() {
           error={errors.email?.message}
           {...register("email")}
         />
+
+        {(watchRole === "student" || watchRole === "instructor") && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="space-y-4 pt-2 border-t border-border mt-4"
+          >
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">Student Information</p>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                label="Age"
+                type="number"
+                placeholder="18"
+                error={errors.age?.message}
+                {...register("age")}
+              />
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">Gender</label>
+                <select 
+                  className="w-full h-10 px-3 rounded-xl border border-input bg-card text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  {...register("gender")}
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <FormField
+              label={watchRole === "student" ? "Course/Skill Interested In" : "Course/Skill You Will Teach"}
+              placeholder="e.g. Data Science, Web Dev"
+              error={errors.interestedCourse?.message}
+              {...register("interestedCourse")}
+            />
+
+            <FormField
+              label="Resident Address"
+              placeholder="123 Street Name, City"
+              error={errors.address?.message}
+              {...register("address")}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                label="Phone Number"
+                placeholder="+234..."
+                error={errors.phoneNumber?.message}
+                {...register("phoneNumber")}
+              />
+              <FormField
+                label="Next of Kin Name"
+                placeholder="Name of relative"
+                error={errors.nextOfKin?.message}
+                {...register("nextOfKin")}
+              />
+              <FormField
+                label="Next of Kin Phone"
+                placeholder="+234..."
+                error={errors.nextOfKinPhoneNumber?.message}
+                {...register("nextOfKinPhoneNumber")}
+              />
+            </div>
+          </motion.div>
+        )}
 
         <PasswordField
           autoComplete="new-password"

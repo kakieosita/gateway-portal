@@ -24,6 +24,7 @@ import {
   Legend
 } from "recharts";
 import { useAdminStats } from "@/hooks/useAdminStats";
+import { useAuthStore } from "@/stores/auth-store";
 import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/admin/")({
@@ -34,6 +35,8 @@ const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', '#10b981', '#f59
 
 function AdminDashboard() {
   const { kpis, charts, activities, loading } = useAdminStats();
+  const user = useAuthStore((s) => s.user);
+  const firstName = user?.displayName ? user.displayName.split(" ")[0] : "Admin";
 
   if (loading) {
     return (
@@ -52,7 +55,7 @@ function AdminDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Welcome back, {firstName}!</h1>
         <p className="text-muted-foreground">
           Real-time overview of your platform's performance and metrics.
         </p>

@@ -9,7 +9,9 @@ import {
   Settings,
   DollarSign,
   Award,
+  LogOut,
 } from "lucide-react";
+import { authApi } from "@/lib/auth-api";
 import {
   Sidebar,
   SidebarContent,
@@ -51,8 +53,8 @@ const adminMenu = [
     icon: Award,
   },
   {
-    title: "Applications",
-    url: "/admin/applications",
+    title: "Platform Oversight",
+    url: "/admin/oversight",
     icon: FileText,
   },
   {
@@ -113,12 +115,18 @@ export function AdminSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Exit Admin">
-              <Link to="/">
-                <span className="truncate group-data-[collapsible=icon]:hidden">
-                  Back to Website
-                </span>
-              </Link>
+            <SidebarMenuButton 
+              tooltip="Sign Out"
+              onClick={async () => {
+                await authApi.logout();
+                window.location.href = "/";
+              }}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="size-4" />
+              <span className="truncate group-data-[collapsible=icon]:hidden">
+                Sign Out
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

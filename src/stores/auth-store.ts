@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { onAuthStateChanged, User as FirebaseUser, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { UserRole, User } from "@/lib/db/schema";
@@ -53,10 +53,16 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
           const userDoc = await getDoc(doc(usersCollection, firebaseUser.uid));
           if (userDoc.exists()) {
-            set({ user: userDoc.data() as User, loading: false });
+            const userData = userDoc.data() as User;
+            if (userData.status === "Suspended" || userData.status === "Inactive") {
+              await signOut(auth);
+              sessionStorage.removeItem(LOCAL_USER_KEY);
+              set({ user: null, loading: false });
+            } else {
+              set({ user: userData, loading: false });
+            }
           } else {
             // Handle case where auth user exists but Firestore doc doesn't yet
-            // This could happen during signup before the doc is created
             set({ user: null, loading: false });
           }
         } catch (error) {

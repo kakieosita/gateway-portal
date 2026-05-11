@@ -2,9 +2,12 @@ import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { InstructorSidebar } from "@/components/instructor/Sidebar";
 import { InstructorTopbar } from "@/components/instructor/Topbar";
+import { useEffect } from "react";
+import { useInstructorStore } from "@/stores/instructor-store";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { redirect } from "@tanstack/react-router";
+import { authApi } from "@/lib/auth-api";
 
 export const Route = createFileRoute("/instructor")({
   beforeLoad: async ({ location }) => {
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/instructor")({
     }
 
     if (user && user.role !== "instructor" && user.role !== "admin") {
-      throw redirect({ to: "/" });
+      throw redirect({ to: authApi.getDashboardRoute(user.role) });
     }
   },
   head: () => ({
@@ -35,6 +38,14 @@ export const Route = createFileRoute("/instructor")({
 function InstructorLayout() {
   const { user, loading } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const initialize = useInstructorStore((s) => s.initialize);
+
+  useEffect(() => {
+    if (user?.id) {
+      const cleanup = initialize(user.id);
+      return () => cleanup();
+    }
+  }, [user?.id, initialize]);
 
   if (loading) {
     return (

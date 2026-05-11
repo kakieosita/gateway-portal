@@ -126,7 +126,7 @@ function StudentsPage() {
             <tbody className="divide-y divide-border">
               {filtered.map((s) => {
                 const course = courses.find((c) => c.id === s.courseId);
-                const initials = s.name.split(" ").map((n) => n[0]).slice(0, 2).join("");
+                const initials = (s?.name || "Student").split(" ").map((n) => n[0]).slice(0, 2).join("");
                 return (
                   <tr key={s.id} className="hover:bg-muted/30 transition">
                     <td className="px-5 py-3">

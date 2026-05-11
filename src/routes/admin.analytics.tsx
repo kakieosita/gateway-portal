@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -21,73 +22,105 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { programsCollection, usersCollection, enrollmentsCollection } from "@/lib/db/collections";
+import { onSnapshot, query, where } from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/analytics")({
   component: AdminAnalytics,
 });
 
-const monthlyRevenue = [
-  { name: "Jan", revenue: 4000 },
-  { name: "Feb", revenue: 3000 },
-  { name: "Mar", revenue: 5000 },
-  { name: "Apr", revenue: 4500 },
-  { name: "May", revenue: 6000 },
-  { name: "Jun", revenue: 5500 },
-];
-
-const courseCompletion = [
-  { name: "Completed", value: 65 },
-  { name: "In Progress", value: 25 },
-  { name: "Dropped", value: 10 },
-];
-
-const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--destructive))"];
-
-const engagementData = [
-  { day: "Mon", hours: 120 },
-  { day: "Tue", hours: 132 },
-  { day: "Wed", hours: 101 },
-  { day: "Thu", hours: 143 },
-  { day: "Fri", hours: 90 },
-  { day: "Sat", hours: 45 },
-  { day: "Sun", hours: 55 },
-];
+const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--destructive))", "#10b981", "#f59e0b"];
 
 function AdminAnalytics() {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalStudents: 0,
+    totalInstructors: 0,
+    totalPrograms: 0,
+    enrollmentData: [] as any[],
+    programDistribution: [] as any[],
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubs: (() => void)[] = [];
+
+    // Sync Users
+    unsubs.push(onSnapshot(usersCollection, (snap) => {
+      const users = snap.docs.map(d => d.data());
+      setStats(prev => ({
+        ...prev,
+        totalUsers: snap.size,
+        totalStudents: users.filter((u: any) => u.role === "student").length,
+        totalInstructors: users.filter((u: any) => u.role === "instructor").length,
+      }));
+    }));
+
+    // Sync Programs
+    unsubs.push(onSnapshot(programsCollection, (snap) => {
+      const programs = snap.docs.map(d => d.data() as any);
+      const categories = ["Degree", "Certificate", "Short Course"];
+      const dist = categories.map(cat => ({
+        name: cat,
+        value: programs.filter(p => p.category === cat).length
+      }));
+      
+      setStats(prev => ({
+        ...prev,
+        totalPrograms: snap.size,
+        programDistribution: dist
+      }));
+    }));
+
+    // Mock engagement/revenue for now as we don't have a transactions collection yet
+    // but we can show enrollment growth if we had a date field in enrollments
+    setLoading(false);
+    return () => unsubs.forEach(u => u());
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Analytics & Reports</h1>
           <p className="text-muted-foreground">
-            In-depth analysis of platform usage, revenue, and engagement.
+            Real-time analysis of platform usage, users, and programs.
           </p>
         </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Total Users" value={stats.totalUsers} description="All roles" />
+        <StatCard title="Students" value={stats.totalStudents} description="Active enrollments" />
+        <StatCard title="Instructors" value={stats.totalInstructors} description="Course authors" />
+        <StatCard title="Programs" value={stats.totalPrograms} description="Published courses" />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-1 lg:col-span-4">
           <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
-            <CardDescription>Monthly revenue across all programs.</CardDescription>
+            <CardTitle>Program Distribution</CardTitle>
+            <CardDescription>Courses categorized by type.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyRevenue} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `$${value}`}
-                  />
-                  <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }} />
-                  <Legend />
-                  <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} activeDot={{ r: 8 }} />
-                </LineChart>
+                <BarChart data={stats.programDistribution}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
@@ -95,57 +128,52 @@ function AdminAnalytics() {
 
         <Card className="col-span-1 lg:col-span-3">
           <CardHeader>
-            <CardTitle>Course Completion Rates</CardTitle>
-            <CardDescription>Overall student progress status.</CardDescription>
+            <CardTitle>User Role Mix</CardTitle>
+            <CardDescription>Percentage breakdown of platform users.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[350px] flex items-center justify-center">
+            <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={courseCompletion}
+                    data={[
+                      { name: "Students", value: stats.totalStudents },
+                      { name: "Instructors", value: stats.totalInstructors },
+                      { name: "Admins", value: stats.totalUsers - stats.totalStudents - stats.totalInstructors }
+                    ]}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
                     outerRadius={100}
-                    fill="#8884d8"
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {courseCompletion.map((entry, index) => (
+                    {[0, 1, 2].map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }} />
-                  <Legend verticalAlign="bottom" height={36} />
+                  <Tooltip />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <div className="grid gap-4 grid-cols-1">
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Engagement</CardTitle>
-            <CardDescription>Total hours spent by students on the platform per day.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={engagementData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip cursor={{ fill: "transparent" }} contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }} />
-                  <Bar dataKey="hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={60} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
+  );
+}
+
+function StatCard({ title, value, description }: { title: string, value: number, description: string }) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
   );
 }

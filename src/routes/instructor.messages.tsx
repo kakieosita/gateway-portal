@@ -53,7 +53,7 @@ function MessagesPage() {
                    className={`w-full flex items-center gap-3 p-4 text-left transition hover:bg-muted/50 ${activeChat === s.id ? 'bg-primary/5 border-r-4 border-primary' : ''}`}
                  >
                     <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
-                       {s.name.split(' ').map(n => n[0]).join('')}
+                       {(s?.name || "User").split(' ').map(n => n[0]).join('')}
                     </div>
                     <div className="min-w-0 flex-1">
                        <div className="flex items-center justify-between mb-0.5">
@@ -74,7 +74,7 @@ function MessagesPage() {
                  <div className="p-4 border-b border-border bg-card flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                        <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
-                          {currentStudent.name.split(' ').map(n => n[0]).join('')}
+                          {(currentStudent?.name || "User").split(' ').map(n => n[0]).join('')}
                        </div>
                        <div>
                           <p className="font-bold text-sm">{currentStudent.name}</p>

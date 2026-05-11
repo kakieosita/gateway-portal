@@ -13,7 +13,16 @@ import {
 import upskillLogo from "@/assets/upskill-logo.png";
 
 
+import { redirect } from "@tanstack/react-router";
+import { authApi } from "@/lib/auth-api";
+
 export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    const { user, initialized } = useAuthStore.getState();
+    if (initialized && user) {
+      throw redirect({ to: authApi.getDashboardRoute(user.role) });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Upskill School of Technology — Owerri" },

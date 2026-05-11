@@ -26,28 +26,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Papa from "papaparse";
 import { db, secondaryAuth, storage } from "@/lib/firebase";
 import { usersCollection } from "@/lib/db/collections";
-import { onSnapshot, doc, setDoc, deleteDoc, updateDoc, Timestamp, query, orderBy } from "firebase/firestore";
+import { onSnapshot, doc, setDoc, deleteDoc, updateDoc, Timestamp, query, orderBy, addDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { User, UserRole } from "@/lib/db/schema";
-import { demoUserStore } from "@/lib/demo-users";
 import { toast } from "sonner";
+import { authApi } from "@/lib/auth-api";
 
-const hasFirebaseCredentials =
-  typeof import.meta.env.VITE_FIREBASE_API_KEY === "string" &&
-  import.meta.env.VITE_FIREBASE_API_KEY.startsWith("AIza") &&
-  !import.meta.env.VITE_FIREBASE_API_KEY.includes("Demo") &&
-  Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
+// Firebase credentials are now required as per project guidelines
 
-function isFirebaseConfigError(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error);
-  return (
-    !hasFirebaseCredentials ||
-    message.includes("api-key") ||
-    message.includes("auth/invalid-api-key") ||
-    message.includes("auth/configuration-not-found")
-  );
-}
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsers,
@@ -55,7 +42,7 @@ export const Route = createFileRoute("/admin/users")({
 
 function AdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
-  const [activeTab, setActiveTab] = useState<UserRole>("student");
+  const [activeTab, setActiveTab] = useState<UserRole | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
@@ -71,53 +58,50 @@ function AdminUsers() {
   });
   const [contractFile, setContractFile] = useState<File | null>(null);
 
+  // Edit User Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    role: "student" as UserRole,
+    status: "Active" as "Active" | "Suspended" | "Inactive",
+  });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Fetch users in real-time
-    const q = query(usersCollection, orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    // Note: We've simplified the query to ensure all users show up regardless of field presence
+    const unsubscribe = onSnapshot(usersCollection, (snapshot) => {
+      console.log("Users snapshot received. Count:", snapshot.size);
       const fetchedUsers = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as User));
       setUsers(fetchedUsers);
+    }, (error) => {
+      console.error("Firestore users subscription error:", error);
+      toast.error("Failed to sync users list. Check your connection.");
     });
     return () => unsubscribe();
   }, []);
 
   const filteredUsers = users.filter(
-    (u) =>
-      u.role === activeTab &&
-      (u.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+    (u) => {
+      const matchesTab = activeTab === "all" || u.role === activeTab;
+      const matchesSearch = (u.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             u.email.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesTab && matchesSearch;
+    }
   );
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Starting handleAddUser...", formData);
     setIsSubmitting(true);
+    const toastId = toast.loading("Creating user...");
     try {
-      if (!hasFirebaseCredentials) {
-        // Demo mode: simulate user creation locally
-        const mockUser: User = {
-          id: `demo-${Date.now()}`,
-          email: formData.email,
-          displayName: formData.name,
-          photoURL: null,
-          role: formData.role,
-          status: "Active",
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        };
-        setUsers((prev) => [mockUser, ...prev]);
-        demoUserStore.add(mockUser, formData.password);
-        toast.success(`${formData.name} added (demo mode — backend not configured)`);
-        setIsAddModalOpen(false);
-        setFormData({ name: "", email: "", password: "", role: activeTab });
-        setContractFile(null);
-        setIsSubmitting(false);
-        return;
-      }
-
+      console.log("Calling createUserWithEmailAndPassword with secondaryAuth...");
       // 1. Create in Firebase Auth (Secondary app to avoid logout)
       const userCredential = await createUserWithEmailAndPassword(secondaryAuth, formData.email, formData.password);
+      console.log("Auth user created:", userCredential.user.uid);
       const uid = userCredential.user.uid;
 
       // 2. Update Profile
@@ -136,9 +120,12 @@ function AdminUsers() {
       };
       
       await setDoc(doc(usersCollection, uid), newUser);
+      console.log("Firestore document saved to database.");
+      
 
       // 4. Handle Instructor Contract Upload (if applicable)
       if (formData.role === "instructor" && contractFile) {
+        console.log("Uploading contract...");
         try {
           const storageRef = ref(storage, `contracts/${uid}/${contractFile.name}`);
           await uploadBytes(storageRef, contractFile);
@@ -146,13 +133,14 @@ function AdminUsers() {
           
           // Update the document with the contract URL
           await updateDoc(doc(usersCollection, uid), { contractUrl });
+          console.log("Contract uploaded and doc updated.");
         } catch (uploadError: any) {
           console.error("Contract upload failed:", uploadError);
-          toast.warning(`User ${formData.name} created, but contract upload failed.`);
+          toast.warning(`User ${formData.name} created, but contract upload failed.`, { id: toastId });
           
           // Cleanup modal state anyway
           setIsAddModalOpen(false);
-          setFormData({ name: "", email: "", password: "", role: activeTab });
+          setFormData({ name: "", email: "", password: "", role: activeTab === "all" ? "student" : activeTab });
           setContractFile(null);
           setIsSubmitting(false);
           return;
@@ -160,12 +148,13 @@ function AdminUsers() {
       }
       
 
-      toast.success(`${formData.name} added successfully!`);
+      toast.success(`${formData.name} added successfully!`, { id: toastId });
       setIsAddModalOpen(false);
-      setFormData({ name: "", email: "", password: "", role: activeTab });
+      setFormData({ name: "", email: "", password: "", role: activeTab === "all" ? "student" : activeTab });
       setContractFile(null);
     } catch (error: any) {
-      toast.error(error.message || "Failed to add user");
+      console.error("Error in handleAddUser:", error);
+      toast.error(error.message || "Failed to add user", { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
@@ -179,6 +168,41 @@ function AdminUsers() {
     } catch (error: any) {
       toast.error("Failed to update status");
     }
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    
+    setIsSubmitting(true);
+    const toastId = toast.loading("Updating user...");
+    try {
+      await updateDoc(doc(usersCollection, editingUser.id), {
+        displayName: editFormData.name,
+        role: editFormData.role,
+        status: editFormData.status,
+        updatedAt: Timestamp.now(),
+      });
+      
+      toast.success("User updated successfully", { id: toastId });
+      setIsEditModalOpen(false);
+      setEditingUser(null);
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      toast.error(error.message || "Failed to update user", { id: toastId });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openEditModal = (user: User) => {
+    setEditingUser(user);
+    setEditFormData({
+      name: user.displayName || "",
+      role: user.role,
+      status: user.status || "Active",
+    });
+    setIsEditModalOpen(true);
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -210,7 +234,7 @@ function AdminUsers() {
           const row = rows[i];
           const name = row.Name || row.name;
           const email = row.Email || row.email;
-          const role = (row.Role || row.role || activeTab).toLowerCase() as UserRole;
+          const role = (row.Role || row.role || (activeTab === "all" ? "student" : activeTab)).toLowerCase() as UserRole;
           
           if (!name || !email) {
             errorCount++;
@@ -345,12 +369,15 @@ function AdminUsers() {
         </div>
       )}
 
-      <Tabs defaultValue="student" onValueChange={(val) => setActiveTab(val as UserRole)}>
+      <Tabs defaultValue="all" onValueChange={(val) => setActiveTab(val as UserRole | "all")}>
         <div className="flex items-center justify-between gap-4 mb-4">
           <TabsList>
+            <TabsTrigger value="all">All Users</TabsTrigger>
             <TabsTrigger value="student">Students</TabsTrigger>
             <TabsTrigger value="instructor">Instructors</TabsTrigger>
             <TabsTrigger value="admin">Admins</TabsTrigger>
+            <TabsTrigger value="alumni">Alumni</TabsTrigger>
+            <TabsTrigger value="partner">Partners</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2 flex-1 max-w-sm ml-auto">
             <div className="relative flex-1">
@@ -387,7 +414,7 @@ function AdminUsers() {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge variant={user.role === "admin" ? "default" : "secondary"} className="capitalize">
-                        {user.role}
+                        {user.role || "No Role"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -428,11 +455,27 @@ function AdminUsers() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem className="cursor-pointer">
+                          <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={() => openEditModal(user)}
+                          >
                             <Edit className="mr-2 h-4 w-4" /> Edit Details
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-warning cursor-pointer" onClick={() => toggleUserStatus(user)}>
                              {user.status === 'Suspended' ? 'Unsuspend User' : 'Suspend User'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={async () => {
+                              try {
+                                await authApi.sendPasswordReset(user.email);
+                                toast.success(`Password reset email sent to ${user.email}`);
+                              } catch (error) {
+                                toast.error("Failed to send reset email");
+                              }
+                            }}
+                          >
+                             <Clock className="mr-2 h-4 w-4" /> Send Password Reset
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => handleDeleteUser(user.id)}>
                             <Trash className="mr-2 h-4 w-4" /> Delete Account
@@ -447,6 +490,71 @@ function AdminUsers() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit User Details</DialogTitle>
+          </DialogHeader>
+          {editingUser && (
+            <form onSubmit={handleUpdateUser} className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Full Name</Label>
+                <Input 
+                  required 
+                  value={editFormData.name} 
+                  onChange={(e) => setEditFormData({...editFormData, name: e.target.value})} 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email (Read-only)</Label>
+                <Input disabled value={editingUser.email} />
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select 
+                  value={editFormData.role} 
+                  onValueChange={(val: UserRole) => setEditFormData({...editFormData, role: val})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="instructor">Instructor</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="partner">Partner</SelectItem>
+                    <SelectItem value="alumni">Alumni</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select 
+                  value={editFormData.status} 
+                  onValueChange={(val: any) => setEditFormData({...editFormData, status: val})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Suspended">Suspended</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end pt-4">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? <Clock className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {isSubmitting ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
       
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button variant="outline" size="sm" disabled>

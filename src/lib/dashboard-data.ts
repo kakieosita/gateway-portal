@@ -25,6 +25,7 @@ export type Assignment = {
   dueDate: string;
   status: "pending" | "submitted" | "graded" | "overdue";
   grade?: string;
+  feedback?: string;
 };
 
 export type Certificate = {

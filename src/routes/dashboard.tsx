@@ -2,9 +2,12 @@ import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { DashboardSidebar } from "@/components/dashboard/Sidebar";
 import { DashboardTopbar } from "@/components/dashboard/Topbar";
+import { useEffect } from "react";
+import { useDashboardStore } from "@/stores/dashboard-store";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { redirect } from "@tanstack/react-router";
+import { authApi } from "@/lib/auth-api";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: async ({ location }) => {
@@ -23,8 +26,8 @@ export const Route = createFileRoute("/dashboard")({
     }
 
     if (user && user.role !== "student" && user.role !== "admin") {
-      // If they are logged in but not a student, send them home or to their own dashboard
-      throw redirect({ to: "/" });
+      // If they are logged in but not a student, send them to their own dashboard
+      throw redirect({ to: authApi.getDashboardRoute(user.role) });
     }
   },
   head: () => ({
@@ -39,6 +42,14 @@ export const Route = createFileRoute("/dashboard")({
 function DashboardLayout() {
   const { user, loading } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const initialize = useDashboardStore((s) => s.initialize);
+
+  useEffect(() => {
+    if (user?.id) {
+      const cleanup = initialize(user.id);
+      return () => cleanup();
+    }
+  }, [user?.id, initialize]);
 
   if (loading) {
     return (

@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useAlumniStore } from "@/stores/alumni-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/alumni/")({
   component: AlumniDashboard,
@@ -22,13 +23,15 @@ export const Route = createFileRoute("/alumni/")({
 
 function AlumniDashboard() {
   const { jobs, events } = useAlumniStore();
+  const user = useAuthStore((s) => s.user);
+  const firstName = user?.displayName ? user.displayName.split(" ")[0] : "Alumni";
 
   return (
     <div className="flex flex-col gap-8">
       {/* Header & Search */}
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back, Alumni!</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {firstName}!</h1>
           <p className="text-muted-foreground">Stay connected with the UST community and explore new opportunities.</p>
         </div>
         <div className="relative max-w-2xl">

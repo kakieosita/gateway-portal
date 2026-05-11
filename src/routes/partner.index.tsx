@@ -23,27 +23,30 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { usePartnerStore } from "@/stores/partner-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/partner/")({
   component: PartnerDashboard,
 });
 
 function PartnerDashboard() {
-  const { engagements, profile } = usePartnerStore();
+  const { engagements, profile: partnerProfile } = usePartnerStore();
+  const user = useAuthStore((s) => s.user);
+  const firstName = user?.displayName ? user.displayName.split(" ")[0] : "Partner";
   
   const totalStaff = engagements.reduce((sum, e) => sum + e.enrolledStaff, 0);
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">Partner Overview</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Welcome back, {firstName}!</h1>
         <div className="flex items-center gap-3">
            <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center text-primary">
               <Building2 className="h-6 w-6" />
            </div>
            <div>
-              <p className="text-sm font-bold leading-none">{profile.orgName}</p>
-              <p className="text-xs text-muted-foreground mt-1">{profile.type} Partner • {profile.location}</p>
+              <p className="text-sm font-bold leading-none">{partnerProfile.orgName}</p>
+              <p className="text-xs text-muted-foreground mt-1">{partnerProfile.type} Partner • {partnerProfile.location}</p>
            </div>
         </div>
       </div>

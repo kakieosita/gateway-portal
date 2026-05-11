@@ -11,6 +11,7 @@ import {
   FileText,
   Users
 } from "lucide-react";
+import { authApi } from "@/lib/auth-api";
 import {
   Sidebar,
   SidebarContent,
@@ -102,13 +103,18 @@ export function PartnerSidebar() {
              </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Exit Portal">
-              <Link to="/">
-                <LogOut className="size-4" />
-                <span className="truncate group-data-[collapsible=icon]:hidden">
-                  Back to Website
-                </span>
-              </Link>
+            <SidebarMenuButton 
+              tooltip="Sign Out"
+              onClick={async () => {
+                await authApi.logout();
+                window.location.href = "/";
+              }}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="size-4" />
+              <span className="truncate group-data-[collapsible=icon]:hidden">
+                Sign Out
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

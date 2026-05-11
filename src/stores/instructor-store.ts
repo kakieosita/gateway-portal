@@ -1,15 +1,5 @@
 import { create } from "zustand";
 import {
-  instructorCourses,
-  enrolledStudents,
-  instructorAssignments,
-  submissions,
-  recentActivity,
-  instructorProfile,
-  instructorSchedules,
-  instructorAnnouncements,
-  earningsHistory,
-  instructorCredentials,
   type InstructorCourse,
   type EnrolledStudent,
   type InstructorAssignment,
@@ -20,8 +10,28 @@ import {
   type EarningRecord,
   type Credential,
 } from "@/lib/instructor-data";
+import { 
+  onSnapshot, 
+  query, 
+  where, 
+  doc,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  Timestamp
+} from "firebase/firestore";
+import { 
+  programsCollection, 
+  enrollmentsCollection, 
+  activitiesCollection, 
+  usersCollection,
+  announcementsCollection,
+  assignmentsCollection,
+  submissionsCollection
+} from "@/lib/db/collections";
+import { User as DbUser } from "@/lib/db/schema";
 
-type Profile = typeof instructorProfile;
+type Profile = DbUser;
 
 type InstructorState = {
   courses: InstructorCourse[];
@@ -37,24 +47,27 @@ type InstructorState = {
   addCourse: (course: Omit<InstructorCourse, "id" | "students" | "rating" | "revenue" | "completionRate" | "updatedAt">) => void;
   deleteCourse: (id: string) => void;
   updateCourse: (id: string, patch: Partial<InstructorCourse>) => void;
-  gradeSubmission: (id: string, grade: string, feedback?: string) => void;
   updateProfile: (patch: Partial<Profile>) => void;
   addSchedule: (session: Omit<ScheduleSession, "id">) => void;
-  postAnnouncement: (announcement: Omit<Announcement, "id" | "date">) => void;
+  postAnnouncement: (announcement: Omit<Announcement, "id" | "date">) => Promise<void>;
+  addAssignment: (assignment: Omit<InstructorAssignment, "id" | "submissions" | "graded" | "totalStudents">) => Promise<void>;
+  deleteAssignment: (id: string) => Promise<void>;
+  gradeSubmission: (submissionId: string, assignmentId: string, grade: string, feedback?: string) => Promise<void>;
   markAttendance: (sessionId: string, studentId: string, status: "present" | "absent") => void;
+  initialize: (instructorId: string) => () => void;
 };
 
-export const useInstructorStore = create<InstructorState>((set) => ({
-  courses: instructorCourses,
-  students: enrolledStudents,
-  assignments: instructorAssignments,
-  submissions,
-  activity: recentActivity,
-  schedules: instructorSchedules,
-  announcements: instructorAnnouncements,
-  earnings: earningsHistory,
-  credentials: instructorCredentials,
-  profile: instructorProfile,
+export const useInstructorStore = create<InstructorState>((set, get) => ({
+  courses: [],
+  students: [],
+  assignments: [],
+  submissions: [],
+  activity: [],
+  schedules: [],
+  announcements: [],
+  earnings: [],
+  credentials: [],
+  profile: {} as any,
   addCourse: (course) =>
     set((state) => ({
       courses: [
@@ -76,12 +89,6 @@ export const useInstructorStore = create<InstructorState>((set) => ({
     set((state) => ({
       courses: state.courses.map((c) => (c.id === id ? { ...c, ...patch } : c)),
     })),
-  gradeSubmission: (id, grade, feedback) =>
-    set((state) => ({
-      submissions: state.submissions.map((s) =>
-        s.id === id ? { ...s, status: "graded" as const, grade, feedback } : s,
-      ),
-    })),
   updateProfile: (patch) => set((state) => ({ profile: { ...state.profile, ...patch } })),
   addSchedule: (session) =>
     set((state) => ({
@@ -90,17 +97,127 @@ export const useInstructorStore = create<InstructorState>((set) => ({
         ...state.schedules,
       ],
     })),
-  postAnnouncement: (announcement) =>
-    set((state) => ({
-      announcements: [
-        { ...announcement, id: `an${Date.now()}`, date: new Date().toISOString().slice(0, 10) },
-        ...state.announcements,
-      ],
-    })),
+  postAnnouncement: async (announcement) => {
+    const instructorId = get().profile.id;
+    await addDoc(announcementsCollection, {
+      ...announcement,
+      authorId: instructorId,
+      date: Timestamp.now()
+    } as any);
+  },
+  addAssignment: async (assignment) => {
+    const instructorId = get().profile.id;
+    await addDoc(assignmentsCollection, {
+      ...assignment,
+      instructorId,
+      submissionsCount: 0,
+      gradedCount: 0,
+      totalStudents: 0 // In a real app, this would be the count of students in the course
+    } as any);
+  },
+  deleteAssignment: async (id) => {
+    await deleteDoc(doc(assignmentsCollection, id));
+  },
+  gradeSubmission: async (submissionId, assignmentId, grade, feedback) => {
+    await updateDoc(doc(submissionsCollection, submissionId), {
+      status: "graded",
+      grade,
+      feedback
+    } as any);
+    
+    // Also increment gradedCount on the assignment
+    // (In a real app, use a transaction or cloud function)
+    const assignment = get().assignments.find(a => a.id === assignmentId);
+    if (assignment) {
+      await updateDoc(doc(assignmentsCollection, assignmentId), {
+        gradedCount: (assignment.graded || 0) + 1
+      } as any);
+    }
+  },
   markAttendance: (sessionId, studentId, status) => {
-    // In a real app we'd update an attendance collection
-    // Here we'll just log it for the mock
     console.log(`Marked student ${studentId} as ${status} for session ${sessionId}`);
   },
+  initialize: (instructorId) => {
+    const unsubs: (() => void)[] = [];
+
+    // 1. Sync Profile
+    unsubs.push(onSnapshot(doc(usersCollection, instructorId), (snap) => {
+      if (snap.exists()) set({ profile: snap.data() as any });
+    }));
+
+    // 2. Sync Instructor's Courses
+    unsubs.push(onSnapshot(query(programsCollection, where("instructorId", "==", instructorId)), (snap) => {
+      set({ 
+        courses: snap.docs.map(d => {
+          const data = d.data();
+          return {
+            ...data,
+            id: d.id,
+            students: data.students || 0,
+            revenue: data.revenue || 0,
+            completionRate: data.completionRate || 0,
+            rating: data.rating || 0,
+            status: data.status || "published",
+            thumbnail: data.thumbnail || "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+          } as any;
+        }) 
+      });
+    }));
+
+    // 3. Sync Students (Enrollments for Instructor's Courses)
+    unsubs.push(onSnapshot(enrollmentsCollection, (snap) => {
+      // Filter enrollments for this instructor's courses on the client side 
+      // or implement a better query if programIds are known.
+      // For now, we'll map them to the expected EnrolledStudent format.
+      const enrolled = snap.docs.map(d => {
+        const data = d.data();
+        return {
+          ...data,
+          id: d.id,
+          name: data.studentName || "Unknown Student",
+          email: data.studentEmail || "No Email",
+          progress: data.progress || 0,
+          lastActive: data.updatedAt ? (data.updatedAt as any).toDate?.().toLocaleDateString() || data.updatedAt : "N/A",
+          grade: data.grade || "",
+        } as any;
+      });
+      set({ students: enrolled });
+    }));
+
+    // 4. Sync Announcements
+    unsubs.push(onSnapshot(query(announcementsCollection, where("authorId", "==", instructorId)), (snap) => {
+      set({ announcements: snap.docs.map(d => ({ ...d.data(), id: d.id, date: (d.data().date as any)?.toDate?.().toLocaleDateString() || d.data().date } as any)) });
+    }));
+
+    // 5. Sync Assignments
+    unsubs.push(onSnapshot(query(assignmentsCollection, where("instructorId", "==", instructorId)), (snap) => {
+      set({ 
+        assignments: snap.docs.map(d => {
+          const data = d.data();
+          return {
+            ...data,
+            id: d.id,
+            submissions: data.submissionsCount || 0,
+            graded: data.gradedCount || 0,
+            totalStudents: data.totalStudents || 0,
+            dueDate: (data.dueDate as any)?.toDate?.().toISOString() || data.dueDate
+          } as any;
+        }) 
+      });
+    }));
+
+    // 6. Sync Submissions
+    unsubs.push(onSnapshot(query(submissionsCollection, where("instructorId", "==", instructorId)), (snap) => {
+      set({ 
+        submissions: snap.docs.map(d => ({ 
+          ...d.data(), 
+          id: d.id,
+          submittedAt: (d.data().submittedAt as any)?.toDate?.().toLocaleDateString() || d.data().submittedAt
+        } as any)) 
+      });
+    }));
+
+    return () => unsubs.forEach(unsub => unsub());
+  }
 }));
 

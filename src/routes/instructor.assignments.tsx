@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Plus, FileText, ClipboardCheck, X, Download } from "lucide-react";
 import { useInstructorStore } from "@/stores/instructor-store";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/instructor/assignments")({
   component: AssignmentsPage,
@@ -10,17 +11,37 @@ export const Route = createFileRoute("/instructor/assignments")({
 function AssignmentsPage() {
   const assignments = useInstructorStore((s) => s.assignments);
   const submissions = useInstructorStore((s) => s.submissions);
-  const gradeSubmission = useInstructorStore((s) => s.gradeSubmission);
+  const courses = useInstructorStore((s) => s.courses);
+  const { addAssignment, gradeSubmission } = useInstructorStore();
   const [openCreate, setOpenCreate] = useState(false);
   const [openSubmissions, setOpenSubmissions] = useState<string | null>(null);
   const [gradingId, setGradingId] = useState<string | null>(null);
   const [gradeInput, setGradeInput] = useState("");
   const [feedbackInput, setFeedbackInput] = useState("");
-  const [newAssignment, setNewAssignment] = useState({ title: "", course: "", type: "assignment", dueDate: "" });
+  const [newAssignment, setNewAssignment] = useState<{ title: string; courseId: string; type: "assignment" | "quiz"; dueDate: string }>({ title: "", courseId: "", type: "assignment", dueDate: "" });
 
-  const submit = () => {
-    setOpenCreate(false);
-    setNewAssignment({ title: "", course: "", type: "assignment", dueDate: "" });
+  const submit = async () => {
+    if (!newAssignment.title || !newAssignment.courseId) {
+      toast.error("Please fill in the title and select a course.");
+      return;
+    }
+    
+    try {
+      const course = courses.find(c => c.id === newAssignment.courseId);
+      await addAssignment({
+        title: newAssignment.title,
+        courseId: newAssignment.courseId,
+        courseName: course?.title || "",
+        type: newAssignment.type as any,
+        dueDate: newAssignment.dueDate,
+        description: ""
+      });
+      toast.success("Assignment created successfully!");
+      setOpenCreate(false);
+      setNewAssignment({ title: "", courseId: "", type: "assignment", dueDate: "" });
+    } catch (error) {
+      toast.error("Failed to create assignment.");
+    }
   };
 
   return (
@@ -52,7 +73,7 @@ function AssignmentsPage() {
                 <div className="min-w-0 flex-1">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">{a.type}</span>
                   <h3 className="line-clamp-2 font-display text-base font-bold leading-snug">{a.title}</h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{a.course}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{a.courseName}</p>
                 </div>
               </div>
               <div className="mt-4 space-y-3">
@@ -77,12 +98,25 @@ function AssignmentsPage() {
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
                 <span className="text-xs text-muted-foreground">Due {new Date(a.dueDate).toLocaleDateString()}</span>
-                <button
-                  onClick={() => setOpenSubmissions(a.id)}
-                  className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/80 transition"
-                >
-                  View submissions
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      if (confirm("Are you sure you want to delete this assignment?")) {
+                        await useInstructorStore.getState().deleteAssignment(a.id);
+                        toast.success("Assignment deleted.");
+                      }
+                    }}
+                    className="rounded-lg border border-destructive/20 p-1.5 text-destructive hover:bg-destructive/10 transition"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setOpenSubmissions(a.id)}
+                    className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:bg-accent/80 transition"
+                  >
+                    View submissions
+                  </button>
+                </div>
               </div>
             </article>
           );
@@ -111,19 +145,23 @@ function AssignmentsPage() {
               </div>
               <div>
                 <label className="mb-1 block text-xs font-semibold">Course</label>
-                <input
-                  value={newAssignment.course}
-                  onChange={(e) => setNewAssignment({ ...newAssignment, course: e.target.value })}
-                  placeholder="Course name"
+                <select
+                  value={newAssignment.courseId}
+                  onChange={(e) => setNewAssignment({ ...newAssignment, courseId: e.target.value })}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
-                />
+                >
+                  <option value="">Select a course</option>
+                  {courses.map(c => (
+                    <option key={c.id} value={c.id}>{c.title}</option>
+                  ))}
+                </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-semibold">Type</label>
                   <select
                     value={newAssignment.type}
-                    onChange={(e) => setNewAssignment({ ...newAssignment, type: e.target.value })}
+                    onChange={(e) => setNewAssignment({ ...newAssignment, type: e.target.value as any })}
                     className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
                   >
                     <option value="assignment">Assignment</option>
@@ -139,6 +177,13 @@ function AssignmentsPage() {
                     className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
                   />
                 </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold">Assignment File (Optional)</label>
+                <input
+                  type="file"
+                  className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-accent file:text-primary hover:file:bg-accent/80 cursor-pointer"
+                />
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
@@ -238,12 +283,17 @@ function AssignmentsPage() {
                              className="text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-muted transition"
                           >Cancel</button>
                           <button
-                             onClick={() => {
-                               if (gradeInput.trim()) {
-                                 gradeSubmission(sub.id, gradeInput.trim(), feedbackInput.trim());
-                                 setGradingId(null);
-                                 setGradeInput("");
-                                 setFeedbackInput("");
+                             onClick={async () => {
+                               if (gradeInput.trim() && openSubmissions) {
+                                 try {
+                                   await gradeSubmission(sub.id, openSubmissions, gradeInput.trim(), feedbackInput.trim());
+                                   toast.success("Grade saved!");
+                                   setGradingId(null);
+                                   setGradeInput("");
+                                   setFeedbackInput("");
+                                 } catch (error) {
+                                   toast.error("Failed to save grade.");
+                                 }
                                }
                              }}
                              className="rounded-lg bg-gradient-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-soft transition hover:shadow-glow"

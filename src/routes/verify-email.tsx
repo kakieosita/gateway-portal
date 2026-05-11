@@ -5,6 +5,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { InlineAlert } from "@/components/auth/Alert";
 import { authApi } from "@/lib/auth-api";
+import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/verify-email")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -57,7 +58,9 @@ function VerifyEmailPage() {
     try {
       await authApi.verifyEmail(digits.join(""));
       setSuccess(true);
-      setTimeout(() => navigate({ to: "/" }), 1200);
+      const { user } = useAuthStore.getState();
+      const target = user ? authApi.getDashboardRoute(user.role) : "/login";
+      setTimeout(() => navigate({ to: target }), 1200);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");
     } finally {

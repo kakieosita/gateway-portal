@@ -16,8 +16,18 @@ export interface User {
   contractUrl?: string;
   // Specific role data can be added as nested objects or separate collections,
   // but for simplicity we keep basic info here.
-  bio?: string;
+  age?: number;
+  gender?: string;
+  interestedCourse?: string;
+  nextOfKin?: string;
+  nextOfKinPhoneNumber?: string;
   phoneNumber?: string;
+  phone?: string;
+  address?: string;
+  matricNo?: string;
+  joinedAt?: Timestamp;
+  location?: string;
+  bio?: string;
   demographics?: {
     age?: number;
     gender?: string;
@@ -28,9 +38,14 @@ export interface User {
 export interface Enrollment {
   id: string;
   studentId: string;
+  studentName?: string;
+  studentEmail?: string;
   programId: string;
+  progress?: number;
+  grade?: string;
   status: "active" | "completed" | "dropped";
   createdAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface Transaction {
@@ -76,13 +91,33 @@ export interface Program {
   title: string;
   slug: string;
   description: string;
-  category: "Degree" | "Certificate" | "Short Course";
+  category: string;
   duration: string; // e.g., '4 Years', '6 Months'
+  durationWeeks?: number;
   level: "Beginner" | "Intermediate" | "Advanced";
-  tuitionFee?: number;
+  pricing?: {
+    groupClass?: number;
+    executiveClass?: number;
+    privateClass?: number;
+    onlineClass?: number;
+    childrenClass?: number;
+  };
+  sessions?: {
+    name: string;
+    schedule: string;
+  }[];
   featuredImage?: string;
   curriculum: { term: string; courses: string[] }[];
   isFeatured: boolean;
+  instructorId?: string;
+  instructorName?: string;
+  materialsUrl?: string;
+  status?: "published" | "draft" | "archived";
+  students?: number;
+  revenue?: number;
+  completionRate?: number;
+  rating?: number;
+  thumbnail?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -119,4 +154,51 @@ export interface Testimonial {
   rating?: number;
   isFeatured: boolean;
   createdAt: Timestamp;
+}
+
+export interface Assignment {
+  id: string;
+  programId: string;
+  title: string;
+  description: string;
+  dueDate: Timestamp;
+  type: "assignment" | "quiz";
+  instructorId: string;
+  totalStudents?: number;
+  submissionsCount?: number;
+  gradedCount?: number;
+}
+
+export interface Submission {
+  id: string;
+  assignmentId: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  instructorId: string;
+  fileUrl: string;
+  fileName: string;
+  status: "pending" | "graded";
+  grade?: string | number;
+  feedback?: string;
+  submittedAt: Timestamp;
+}
+
+export interface Certificate {
+  id: string;
+  studentId: string;
+  programId: string;
+  programName: string;
+  issueDate: Timestamp;
+  verificationId: string;
+  url?: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  date: Timestamp;
+  authorId: string;
+  targetRole?: UserRole | "all";
 }

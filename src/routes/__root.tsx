@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "
 import { useEffect } from "react";
 import { useAuthStore } from "../stores/auth-store";
 import { MyRouterContext } from "../router";
+import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 
@@ -65,6 +66,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster position="top-center" richColors />
         <Scripts />
       </body>
     </html>

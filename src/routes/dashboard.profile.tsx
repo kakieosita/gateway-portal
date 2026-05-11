@@ -18,7 +18,7 @@ function Profile() {
   const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
   const [pwdMsg, setPwdMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const initials = user.name.split(" ").map((n) => n[0]).slice(0, 2).join("");
+  const initials = (user?.displayName || "User").split(" ").map((n) => n[0]).slice(0, 2).join("");
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +78,7 @@ function Profile() {
                 </button>
               </div>
               <div className="flex-1">
-                <h2 className="font-display text-xl font-bold">{user.name}</h2>
+                <h2 className="font-display text-xl font-bold">{user.displayName}</h2>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                   <span className="rounded-full bg-accent px-2.5 py-1 font-semibold text-primary">
@@ -88,7 +88,7 @@ function Profile() {
                     {user.matricNo}
                   </span>
                   <span className="rounded-full bg-muted px-2.5 py-1 font-medium text-muted-foreground">
-                    Joined {user.joinedAt}
+                    Joined {user.joinedAt && (user.joinedAt as any).toDate ? (user.joinedAt as any).toDate().toLocaleDateString() : String(user.joinedAt || "N/A")}
                   </span>
                 </div>
               </div>
@@ -106,29 +106,29 @@ function Profile() {
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <Field label="Full name">
                 <input
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  value={form.displayName || ""}
+                  onChange={(e) => setForm({ ...form, displayName: e.target.value })}
                   className="input"
                 />
               </Field>
               <Field label="Email address">
                 <input
                   type="email"
-                  value={form.email}
+                  value={form.email || ""}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="input"
                 />
               </Field>
               <Field label="Phone">
                 <input
-                  value={form.phone}
+                  value={form.phone || ""}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   className="input"
                 />
               </Field>
               <Field label="Location">
                 <input
-                  value={form.location}
+                  value={form.location || ""}
                   onChange={(e) => setForm({ ...form, location: e.target.value })}
                   className="input"
                 />
@@ -136,7 +136,7 @@ function Profile() {
               <div className="sm:col-span-2">
                 <Field label="Bio">
                   <textarea
-                    value={form.bio}
+                    value={form.bio || ""}
                     onChange={(e) => setForm({ ...form, bio: e.target.value })}
                     rows={3}
                     className="input resize-none"

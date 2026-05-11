@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Upload, FileText, CheckCircle2, AlertCircle, Award } from "lucide-react";
 import { useDashboardStore } from "@/stores/dashboard-store";
+import { toast } from "sonner";
 import type { Assignment } from "@/lib/dashboard-data";
 
 export const Route = createFileRoute("/dashboard/assignments")({
@@ -25,13 +26,17 @@ function Assignments() {
     fileInputRef.current?.click();
   };
 
-  const handleFileSelected = () => {
-    if (uploadingId) {
-      // simulate upload latency
-      setTimeout(() => {
-        submitAssignment(uploadingId);
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && uploadingId) {
+      try {
+        await submitAssignment(uploadingId, file);
+        toast.success("Assignment submitted successfully!");
+      } catch (err) {
+        toast.error("Failed to upload assignment. Please try again.");
+      } finally {
         setUploadingId(null);
-      }, 600);
+      }
     }
   };
 
@@ -83,6 +88,12 @@ function Assignments() {
                         </span>
                       )}
                     </div>
+                    {a.feedback && (
+                      <div className="mt-3 rounded-lg bg-accent/30 p-3 text-xs border border-border">
+                        <p className="font-bold text-primary mb-1">Instructor Feedback:</p>
+                        <p className="text-muted-foreground italic">"{a.feedback}"</p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="shrink-0">

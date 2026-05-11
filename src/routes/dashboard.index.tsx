@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { BookOpen, CheckCircle2, Clock, Award, TrendingUp, FileText, Calendar, Activity as ActivityIcon, Bell, GraduationCap, MapPin } from "lucide-react";
+import { BookOpen, CheckCircle2, Clock, Award, TrendingUp, FileText, Calendar, Activity as ActivityIcon, Bell, GraduationCap, MapPin, User } from "lucide-react";
 import { useDashboardStore } from "@/stores/dashboard-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { CourseCard } from "@/components/dashboard/CourseCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardOverview,
@@ -169,6 +170,49 @@ function DashboardOverview() {
                    </div>
                  ))}
               </div>
+           </section>
+
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <User className="h-5 w-5 text-primary" />
+                <h2 className="font-display text-xl font-bold">Student Profile</h2>
+              </div>
+              <Card className="p-5 space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                   <div>
+                      <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Age</p>
+                      <p className="font-medium">{authUser?.age || "N/A"}</p>
+                   </div>
+                   <div>
+                      <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Gender</p>
+                      <p className="font-medium">{authUser?.gender || "N/A"}</p>
+                   </div>
+                   <div>
+                      <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Phone</p>
+                      <p className="font-medium">{authUser?.phoneNumber || "N/A"}</p>
+                   </div>
+                   <div>
+                      <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Next of Kin</p>
+                      <p className="font-medium">{authUser?.nextOfKin || "N/A"}</p>
+                      {authUser?.nextOfKinPhoneNumber && <p className="text-[10px] text-muted-foreground">{authUser.nextOfKinPhoneNumber}</p>}
+                   </div>
+                   <div>
+                      <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Address</p>
+                      <p className="font-medium text-[10px] leading-tight truncate max-w-[150px]">{authUser?.address || "N/A"}</p>
+                   </div>
+                </div>
+                <div className="pt-4 border-t border-border">
+                   <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-1">Registered Course</p>
+                   <p className="font-semibold text-primary">{authUser?.interestedCourse || (courses[0]?.title) || "No Active Course"}</p>
+                   <div className="mt-3 flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-primary font-bold text-xs">TR</div>
+                      <div>
+                         <p className="text-xs font-bold">Assigned Instructor</p>
+                         <p className="text-[10px] text-muted-foreground">Dr. Thompson Reed</p>
+                      </div>
+                   </div>
+                </div>
+              </Card>
            </section>
 
            <section>

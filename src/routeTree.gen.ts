@@ -63,6 +63,7 @@ import { Route as AlumniCareerRouteImport } from './routes/alumni.career'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminProgramsRouteImport } from './routes/admin.programs'
+import { Route as AdminOversightRouteImport } from './routes/admin.oversight'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminCertificatesRouteImport } from './routes/admin.certificates'
@@ -342,6 +343,11 @@ const AdminProgramsRoute = AdminProgramsRouteImport.update({
   path: '/programs',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOversightRoute = AdminOversightRouteImport.update({
+  id: '/oversight',
+  path: '/oversight',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -402,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/admin/certificates': typeof AdminCertificatesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/oversight': typeof AdminOversightRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -460,6 +467,7 @@ export interface FileRoutesByTo {
   '/admin/certificates': typeof AdminCertificatesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/oversight': typeof AdminOversightRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -525,6 +533,7 @@ export interface FileRoutesById {
   '/admin/certificates': typeof AdminCertificatesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/oversight': typeof AdminOversightRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -591,6 +600,7 @@ export interface FileRouteTypes {
     | '/admin/certificates'
     | '/admin/finance'
     | '/admin/notifications'
+    | '/admin/oversight'
     | '/admin/programs'
     | '/admin/settings'
     | '/admin/users'
@@ -649,6 +659,7 @@ export interface FileRouteTypes {
     | '/admin/certificates'
     | '/admin/finance'
     | '/admin/notifications'
+    | '/admin/oversight'
     | '/admin/programs'
     | '/admin/settings'
     | '/admin/users'
@@ -713,6 +724,7 @@ export interface FileRouteTypes {
     | '/admin/certificates'
     | '/admin/finance'
     | '/admin/notifications'
+    | '/admin/oversight'
     | '/admin/programs'
     | '/admin/settings'
     | '/admin/users'
@@ -1155,6 +1167,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProgramsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/oversight': {
+      id: '/admin/oversight'
+      path: '/oversight'
+      fullPath: '/admin/oversight'
+      preLoaderRoute: typeof AdminOversightRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/notifications': {
       id: '/admin/notifications'
       path: '/notifications'
@@ -1220,6 +1239,7 @@ interface AdminRouteChildren {
   AdminCertificatesRoute: typeof AdminCertificatesRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminOversightRoute: typeof AdminOversightRoute
   AdminProgramsRoute: typeof AdminProgramsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -1232,6 +1252,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCertificatesRoute: AdminCertificatesRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminOversightRoute: AdminOversightRoute,
   AdminProgramsRoute: AdminProgramsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
@@ -1395,3 +1416,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

@@ -9,7 +9,10 @@ import {
   Testimonial,
   Enrollment,
   Transaction,
-  Activity
+  Activity,
+  Assignment,
+  Certificate,
+  Announcement
 } from "./schema";
 
 // Helper to create a typed collection reference
@@ -27,3 +30,9 @@ export const testimonialsCollection = createCollection<Testimonial>("testimonial
 export const enrollmentsCollection = createCollection<Enrollment>("enrollments");
 export const transactionsCollection = createCollection<Transaction>("transactions");
 export const activitiesCollection = createCollection<Activity>("activities");
+export const assignmentsCollection = createCollection<Assignment>("assignments");
+export const certificatesCollection = createCollection<Certificate>("certificates");
+export const announcementsCollection = createCollection<Announcement>("announcements");
+export const studentsCollection = createCollection<any>("students");
+export const instructorsCollection = createCollection<any>("instructors");
+export const submissionsCollection = createCollection<any>("submissions");
